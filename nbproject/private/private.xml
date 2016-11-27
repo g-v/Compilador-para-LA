@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/TabelaDeSimbolos_STRCT.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/Example.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/TabelaDeSimbolos_VAR.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/parser/LAVisitor.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/EntradaTS_VAR.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/EntradaTS_TIPO.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/AstPrinter.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/parser/LAListener.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/parser/LAParser.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/AnalizadorSemantico.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/EntradaTabelaDeSimbolos.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/tipos_basicos.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/parser/LA.tokens</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/ParserFacade.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/Escopos.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/parser/LABaseVisitor.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/TabelaDeSimbolos_TIPOS.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/parser/LALexer.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/main/antlr/LA.g4</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/parser/LABaseListener.java</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/parser/LALexer.tokens</file>
+            <file>file:/C:/Users/Esquilo/Documents/NetBeansProjects/T1/src/trabalho1/EntradaTS_STRCT.java</file>
+        </group>
+    </open-files>
+</project-private>
