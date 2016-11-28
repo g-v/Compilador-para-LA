@@ -14,10 +14,13 @@ public class TDSContext {
     
     TabelaDeSimbolos_TIPOS tabelaDeTipos;
     
+    int STRCTLevel;
     TDSContext()
     {
         structContext = new STRCTContext(new TabelaDeSimbolos_STRCT(), new TabelaDeSimbolos_VAR());
         tabelaDeTipos = new TabelaDeSimbolos_TIPOS();
+        
+        STRCTLevel = 0;
     }
     
     void setCurrentStructure(String name)
@@ -30,6 +33,23 @@ public class TDSContext {
         structContext.setSTRCTContext(0);
     }
     
+    void enterSTRCTLevel(String nomeEstrutura)
+    {
+        structContext.enterSTRCTLevel(nomeEstrutura);
+        STRCTLevel++;
+    }
+    
+    void leaveSTRCTLevel()
+    {
+        structContext.leaveSTRCTLevel();
+        STRCTLevel--;
+    }
+    
+    int getSTRCTLevel()
+    {
+        return STRCTLevel;
+    }
+    
     void insereVAR(String nome, int tipo, int dimensao, int nPonteiros)
     {
         structContext.insereVariavel(nome, tipo, dimensao, nPonteiros);
@@ -40,9 +60,9 @@ public class TDSContext {
         return structContext.verificaVariavel(nome);
     }
     
-    void insereTIPO(String nome, int valor, int nPonteiros, boolean isStructure)
+    void insereTIPO(String nome, int valor, int nPonteiros, String tipoAlias, boolean isStructure)
     {
-        tabelaDeTipos.inserir(nome, valor, nPonteiros, isStructure);
+        tabelaDeTipos.inserir(nome, valor, nPonteiros, tipoAlias, isStructure);
     }
     
     EntradaTS_TIPO verificaTIPO(String nome)

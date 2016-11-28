@@ -22,7 +22,7 @@ private Map<String, EntradaTS_TIPO> tabelaDeSimbolos;
         indiceAtual = 0;
     }
     
-    public void inserir(String nome, int valor, int nPonteiros, boolean isStructure) {
+    public void inserir(String nome, int valor, int nPonteiros, String tipoAlias, boolean isStructure) {
         EntradaTS_TIPO etds = new EntradaTS_TIPO();
         etds.nome = nome;
         etds.valor = valor;

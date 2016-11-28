@@ -12,4 +12,5 @@ package trabalho1;
 public class EntradaTS_TIPO extends EntradaTabelaDeSimbolos{
     boolean isStructure;
     int nPonteiros;
+    String tipoAlias;
 }

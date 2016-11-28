@@ -5,6 +5,10 @@
  */
 package trabalho1;
 
+import java.util.Stack;
+
+
+
 /**
  *
  * @author Esquilo
@@ -13,6 +17,7 @@ public class STRCTContext {
     String structName;
     int mode;
     TabelaDeSimbolos_STRCT tabelaDeEstruturas;
+    Stack<TabelaDeSimbolos_STRCT> paiStack;
     TabelaDeSimbolos_VAR tabelaVARBase;
     
     STRCTContext(TabelaDeSimbolos_STRCT tabela, TabelaDeSimbolos_VAR tabelaBase)
@@ -24,6 +29,9 @@ public class STRCTContext {
     
     void setSTRCTContext(String name)
     {
+        if(tabelaDeEstruturas.verificar(name) == null)
+            tabelaDeEstruturas.inserir(name);
+        
         structName = name;
         mode = 1;
     }
@@ -34,6 +42,23 @@ public class STRCTContext {
             mode = 1;
         else
             mode = 0;
+    }
+    
+    void enterSTRCTLevel(String nomeEstrutura)
+    {
+        EntradaTS_STRCT etds = tabelaDeEstruturas.verificar(nomeEstrutura);
+        if(etds == null)
+            return;
+        else
+        {
+            paiStack.push(tabelaDeEstruturas);
+            tabelaDeEstruturas = etds.estruturasAninhadas;
+        }
+    }
+    
+    void leaveSTRCTLevel()
+    {
+        tabelaDeEstruturas = paiStack.pop();
     }
     
     void insereVariavel(String nome, int tipo, int dimensao, int nPonteiros)

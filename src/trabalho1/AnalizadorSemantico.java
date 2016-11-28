@@ -19,6 +19,7 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
     int tipo;
     int nPonteiros;
     String nome;
+    String tipoAlias;
     boolean isStructure;
     //tmp
 
@@ -26,7 +27,7 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
     public Void visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {
         if(ctx.dclLocalConst != null)
         {
-            EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo().getText());
+            EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo_basico().getText());
             if(ctx.tipo() == null)
             {
                 //erro tipo nao declarado
@@ -42,7 +43,7 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
         {
             nome = ctx.dclLocalTipo.getText();
             visitTipo(ctx.tipo());
-            tdsContext.insereTIPO(nome, tipo, nPonteiros, isStructure);
+            tdsContext.insereTIPO(nome, tdsContext.tabelaDeTipos.indiceAtual + 1, nPonteiros, tipoAlias, isStructure);
         }else // variavel
         {
             visitVariavel(ctx.variavel());
@@ -54,13 +55,27 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
     public Void visitTipo(LAParser.TipoContext ctx) {
         if(ctx.registro() != null)
         {
+            if(isStructure == true)
+                tdsContext.enterSTRCTLevel(nome);
+            
             isStructure = true;
             nPonteiros = 0;
+            
+            tdsContext.setCurrentStructure(nome);
             visitRegistro(ctx.registro());
+            tdsContext.setNoStructure();
+            
+            isStructure = false;
+            
+            if(tdsContext.getSTRCTLevel() > 0)
+                tdsContext.leaveSTRCTLevel();
+            
             tipo = tdsContext.tabelaDeTipos.indiceAtual + 1;
+            tipoAlias = "registro";
         }else //tipo estendido
         {
             isStructure = false;
+            tipoAlias = ctx.tipo_estendido().tipo_basico_ident().getText();
             EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo_estendido().tipo_basico_ident().getText());
             if(etds == null)
             {
@@ -78,7 +93,6 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
     @Override
     public Void visitRegistro(LAParser.RegistroContext ctx) {
         
-        tdsContext.setCurrentStructure(nome);
         visitVariavel(ctx.variavel());
         
         if(ctx.mais_variaveis() != null)
@@ -92,12 +106,13 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
     @Override
     public Void visitVariavel(LAParser.VariavelContext ctx) {
         
-        visitTipo(ctx.tipo());
         if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
         {
             //erro, variavel ja declarada
         }else
-        {    
+        {   
+            nome = ctx.IDENT().getText() + "_anonSTRCT_";
+            visitTipo(ctx.tipo());
             tdsContext.insereVAR(ctx.IDENT().getText(), tipo, Integer.parseInt(ctx.dimensao().getText()), 0);
             if(ctx.mais_var() != null)
             {
