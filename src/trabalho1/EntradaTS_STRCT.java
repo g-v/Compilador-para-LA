@@ -13,6 +13,12 @@ public class EntradaTS_STRCT extends EntradaTabelaDeSimbolos{
     public TabelaDeSimbolos_VAR variaveis;
     public TabelaDeSimbolos_STRCT estruturasAninhadas;
     
+    EntradaTS_STRCT()
+    {
+        variaveis = new TabelaDeSimbolos_VAR();
+        estruturasAninhadas = new TabelaDeSimbolos_STRCT();
+    }
+    
     public void inserirVar(String nome, int valor, int dimensao, int nPonteiros) {
         variaveis.inserir(nome, valor, dimensao, nPonteiros);
     }

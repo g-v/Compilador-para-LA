@@ -12,36 +12,37 @@ import trabalho1.parser.LAParser;
  */
 public class AnalizadorSemantico extends LABaseVisitor<Void>{
 
-    TabelaDeSimbolos_VAR tdsVAR;
-    TabelaDeSimbolos_TIPOS tdsTIPOS;
-    TabelaDeSimbolos_STRCT tdsSTRCT;
+    TDSContext tdsContext;
 
     //tmp
     
     int tipo;
     int nPonteiros;
-    
+    String nome;
+    boolean isStructure;
     //tmp
 
     @Override
     public Void visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {
         if(ctx.dclLocalConst != null)
         {
-            EntradaTS_TIPO etds = tdsTIPOS.verificar(ctx.tipo().getText());
+            EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo().getText());
             if(ctx.tipo() == null)
             {
                 //erro tipo nao declarado
             }else
             {
-                if(tdsVAR.verificar(ctx.IDENT().getText()) != null)
+                if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
                 {
                     //erro, variavel ja declarada
                 }else
-                    tdsVAR.inserir(ctx.IDENT().getText(), etds.valor, 1, 0);
+                    tdsContext.insereVAR(ctx.IDENT().getText(), etds.valor, 1, 0);
             }
         }else if(ctx.dclLocalTipo != null)
         {
-            
+            nome = ctx.dclLocalTipo.getText();
+            visitTipo(ctx.tipo());
+            tdsContext.insereTIPO(nome, tipo, nPonteiros, isStructure);
         }else // variavel
         {
             visitVariavel(ctx.variavel());
@@ -53,17 +54,35 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
     public Void visitTipo(LAParser.TipoContext ctx) {
         if(ctx.registro() != null)
         {
-            EntradaTS_TIPO etds = tdsTIPOS.verificar(ctx.tipo_estendido().tipo_basico_ident().getText());
+            isStructure = true;
+            nPonteiros = 0;
+            visitRegistro(ctx.registro());
+            tipo = tdsContext.tabelaDeTipos.indiceAtual + 1;
+        }else //tipo estendido
+        {
+            isStructure = false;
+            EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo_estendido().tipo_basico_ident().getText());
             if(etds == null)
             {
                 //erro, tipo nao declarado
             }else
+            {
                 tipo = etds.valor;
-        }else //tipo estendido
-        {
-            nPonteiros = ctx.tipo_estendido().ponteiros_opcionais().depth();
-            
+                nPonteiros = ctx.tipo_estendido().ponteiros_opcionais().depth();
+            }
         }
+        
+        return null;
+    }
+
+    @Override
+    public Void visitRegistro(LAParser.RegistroContext ctx) {
+        
+        tdsContext.setCurrentStructure(nome);
+        visitVariavel(ctx.variavel());
+        
+        if(ctx.mais_variaveis() != null)
+            visitMais_variaveis(ctx.mais_variaveis());
         
         return null;
     }
@@ -74,12 +93,12 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
     public Void visitVariavel(LAParser.VariavelContext ctx) {
         
         visitTipo(ctx.tipo());
-        if(tdsVAR.verificar(ctx.IDENT().getText()) != null)
+        if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
         {
             //erro, variavel ja declarada
         }else
         {    
-            tdsVAR.inserir(ctx.IDENT().getText(), tipo, Integer.parseInt(ctx.dimensao().getText()), 0);
+            tdsContext.insereVAR(ctx.IDENT().getText(), tipo, Integer.parseInt(ctx.dimensao().getText()), 0);
             if(ctx.mais_var() != null)
             {
                 visitMais_var(ctx.mais_var());
@@ -93,12 +112,12 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
     
     @Override
     public Void visitMais_var(LAParser.Mais_varContext ctx) {
-        if(tdsVAR.verificar(ctx.IDENT().getText()) != null)
+        if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
         {
             //erro, variavel ja declarada
         }else
         {
-            tdsVAR.inserir(ctx.IDENT().getText(), tipo, Integer.parseInt(ctx.dimensao().getText()), 0);
+            tdsContext.insereVAR(ctx.IDENT().getText(), tipo, Integer.parseInt(ctx.dimensao().getText()), 0);
                 if(ctx.mais_var() != null)
                     visitMais_var(ctx.mais_var());
         

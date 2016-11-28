@@ -10,5 +10,6 @@ package trabalho1;
  * @author Esquilo
  */
 public class EntradaTS_TIPO extends EntradaTabelaDeSimbolos{
-    
+    boolean isStructure;
+    int nPonteiros;
 }
