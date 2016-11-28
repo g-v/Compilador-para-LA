@@ -12,4 +12,5 @@ package trabalho1;
 public class EntradaTS_VAR extends EntradaTabelaDeSimbolos{
     int tipo;
     int dimensao;
+    int nPonteiros;
 }
