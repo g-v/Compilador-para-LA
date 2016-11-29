@@ -1,4 +1,4 @@
-// Generated from C:\Users\Esquilo\Documents\NetBeansProjects\T1\src\main\antlr\LA.g4 by ANTLR 4.2.2
+// Generated from C:\Users\Lucas\Desktop\Compilador-para-LA-master\src\main\antlr\LA.g4 by ANTLR 4.2.2
 package trabalho1.parser;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -1168,6 +1168,8 @@ public class LAParser extends Parser {
 	}
 
 	public static class Declaracao_globalContext extends ParserRuleContext {
+		public Token dclGlobalProcedimento;
+		public Token dclGlobalFuncao;
 		public Tipo_estendidoContext tipo_estendido() {
 			return getRuleContext(Tipo_estendidoContext.class,0);
 		}
@@ -1210,7 +1212,7 @@ public class LAParser extends Parser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(220); match(40);
-				setState(221); match(IDENT);
+				setState(221); ((Declaracao_globalContext)_localctx).dclGlobalProcedimento = match(IDENT);
 				setState(222); match(13);
 				setState(223); parametros_opcional();
 				setState(224); match(55);
@@ -1223,7 +1225,7 @@ public class LAParser extends Parser {
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(229); match(56);
-				setState(230); match(IDENT);
+				setState(230); ((Declaracao_globalContext)_localctx).dclGlobalFuncao = match(IDENT);
 				setState(231); match(13);
 				setState(232); parametros_opcional();
 				setState(233); match(55);

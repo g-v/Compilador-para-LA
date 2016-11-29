@@ -12,15 +12,20 @@ package trabalho1;
 public class TDSContext {
     STRCTContext structContext;
     
+    TabelaDeSimbolos_FUNC tabelaFunc;
     TabelaDeSimbolos_TIPOS tabelaDeTipos;
     
     int STRCTLevel;
+    boolean FUNCMode;
+    String nomeFUNC;
     TDSContext()
     {
         structContext = new STRCTContext(new TabelaDeSimbolos_STRCT(), new TabelaDeSimbolos_VAR());
+        tabelaFunc = new TabelaDeSimbolos_FUNC();
         tabelaDeTipos = new TabelaDeSimbolos_TIPOS();
         
         STRCTLevel = 0;
+        FUNCMode = false;
     }
     
     void setCurrentStructure(String name)
@@ -50,9 +55,23 @@ public class TDSContext {
         return STRCTLevel;
     }
     
+    void setFUNCMode(String nome)
+    {
+        nomeFUNC = nome;
+        FUNCMode = true;
+    }
+    
+    void leaveFUNCMode()
+    {
+        FUNCMode = false;
+    }
+    
     void insereVAR(String nome, int tipo, int dimensao, int nPonteiros)
     {
-        structContext.insereVariavel(nome, tipo, dimensao, nPonteiros);
+        if(FUNCMode == false)
+            structContext.insereVariavel(nome, tipo, dimensao, nPonteiros);
+        else
+            tabelaFunc.inserirVarEmFUNC(nome, nomeFUNC, tipo, dimensao, nPonteiros);
     }
     
     EntradaTS_VAR verificaVAR(String nome)
@@ -68,5 +87,25 @@ public class TDSContext {
     EntradaTS_TIPO verificaTIPO(String nome)
     {
         return tabelaDeTipos.verificar(nome);
+    }
+    
+    void insereFUNC(String nome, int tipoRetorno, int nPonteirosRetorno)
+    {
+        tabelaFunc.inserir(nome, tipoRetorno, nPonteirosRetorno);
+    }
+    
+    void incNumeroArgumentosFunc(String nome)
+    {
+        tabelaFunc.incNumeroArgumentosFunc(nome);
+    }
+    
+    void setNumeroArgumentosFunc(String nome, int n)
+    {
+        tabelaFunc.setNumeroArgumentosFunc(nome, n);
+    }
+    
+    EntradaTS_FUNC verificaFUNC(String nome)
+    {
+        return tabelaFunc.verificar(nome);
     }
 }

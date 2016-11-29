@@ -38,8 +38,8 @@ valor_constante	: CADEIA | NUM_INT | NUM_REAL | 'verdadeiro' | 'falso' ;
 
 registro : 'registro' variavel mais_variaveis 'fim_registro' ;
 
-declaracao_global	: 'procedimento' IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento'		     
-			              | 'funcao' IDENT '(' parametros_opcional ')' ':' tipo_estendido declaracoes_locais comandos 'fim_funcao' ;
+declaracao_global	: 'procedimento' dclGlobalProcedimento=IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento'		     
+			              | 'funcao' dclGlobalFuncao=IDENT '(' parametros_opcional ')' ':' tipo_estendido declaracoes_locais comandos 'fim_funcao' ;
 
 parametros_opcional	: parametro | /* epsilon */ ;
 

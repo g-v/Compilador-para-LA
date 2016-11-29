@@ -18,6 +18,7 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
     
     int tipo;
     int nPonteiros;
+    int nParametros;
     String nome;
     String tipoAlias;
     boolean isStructure;
@@ -28,7 +29,7 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
         if(ctx.dclLocalConst != null)
         {
             EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo_basico().getText());
-            if(ctx.tipo() == null)
+            if(etds == null)
             {
                 //erro tipo nao declarado
             }else
@@ -57,11 +58,12 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
         {
             if(isStructure == true)
                 tdsContext.enterSTRCTLevel(nome);
+            else
+                tdsContext.setCurrentStructure(nome);
             
             isStructure = true;
             nPonteiros = 0;
             
-            tdsContext.setCurrentStructure(nome);
             visitRegistro(ctx.registro());
             tdsContext.setNoStructure();
             
@@ -138,6 +140,94 @@ public class AnalizadorSemantico extends LABaseVisitor<Void>{
         
         }
   
+        return null;
+    }
+
+    @Override
+    public Void visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
+        nParametros = 0;
+        if(ctx.dclGlobalProcedimento != null)
+        {
+            EntradaTS_FUNC etds = tdsContext.verificaFUNC(ctx.dclGlobalProcedimento.getText());
+            if(etds != null)
+            {
+                //erro, função ja declarada
+            }
+            else
+            {
+                tdsContext.insereFUNC(ctx.dclGlobalProcedimento.getText(), -1, 0);
+  
+                tdsContext.setFUNCMode(ctx.dclGlobalProcedimento.getText());
+                //comeca a adicionar as variaveis ao procedimento
+                if(ctx.parametros_opcional().parametro() != null)
+                {
+                    visitParametros_opcional(ctx.parametros_opcional());
+                    tdsContext.setNumeroArgumentosFunc(ctx.dclGlobalProcedimento.getText(), nParametros);
+                }
+                //enough
+                tdsContext.leaveFUNCMode();
+                visitDeclaracoes_locais(ctx.declaracoes_locais());
+            }
+        }else if(ctx.dclGlobalFuncao != null)
+        {
+            EntradaTS_FUNC etds = tdsContext.verificaFUNC(ctx.dclGlobalFuncao.getText());
+            if(etds != null)
+            {
+                //erro, função ja declarada
+            }
+            else
+            {
+                EntradaTS_TIPO entradaTipo = tdsContext.verificaTIPO(ctx.tipo_estendido().tipo_basico_ident().getText());
+                if(entradaTipo == null)
+                {
+                    //erro, tipo nao declarado
+                }else
+                {
+                    tdsContext.insereFUNC(ctx.dclGlobalFuncao.getText(), entradaTipo.valor, 
+                            ctx.tipo_estendido().ponteiros_opcionais().depth());
+  
+                    tdsContext.setFUNCMode(ctx.dclGlobalFuncao.getText());
+                    //comeca a adicionar as variaveis ao procedimento
+                    if(ctx.parametros_opcional().parametro() != null)
+                    {
+                        visitParametros_opcional(ctx.parametros_opcional());
+                        tdsContext.setNumeroArgumentosFunc(ctx.dclGlobalFuncao.getText(), nParametros);
+                    }
+                }
+                
+                //enough
+                tdsContext.leaveFUNCMode();
+                visitDeclaracoes_locais(ctx.declaracoes_locais());
+            }
+        }
+        
+        return null;
+    }
+
+    @Override
+    public Void visitParametro(LAParser.ParametroContext ctx) {
+        
+        EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo_estendido().tipo_basico_ident().getText());
+        if(etds == null)
+        {
+            //erro, tipo nao declarado
+        }else
+        {
+            tipo = etds.valor;
+            nPonteiros = ctx.tipo_estendido().ponteiros_opcionais().depth();
+        }
+        
+        visitIdentificador(ctx.identificador());
+        visitMais_ident(ctx.mais_ident());
+        
+        visitMais_parametros(ctx.mais_parametros());
+        return null;
+    }
+
+    @Override
+    public Void visitIdentificador(LAParser.IdentificadorContext ctx) {
+        tdsContext.insereVAR(ctx.IDENT().getText(), tipo, Integer.parseInt(ctx.dimensao().getText()), nPonteiros);
+        nParametros++;
         return null;
     }
     
