@@ -38,8 +38,8 @@ valor_constante	: CADEIA | NUM_INT | NUM_REAL | 'verdadeiro' | 'falso' ;
 
 registro : 'registro' variavel mais_variaveis 'fim_registro' ;
 
-declaracao_global	: 'procedimento' IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento'		     
-			              | 'funcao' IDENT '(' parametros_opcional ')' ':' tipo_estendido declaracoes_locais comandos 'fim_funcao' ;
+declaracao_global	: 'procedimento' dclGlobalProcedimento=IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento'		     
+			              | 'funcao' dclGlobalFuncao=IDENT '(' parametros_opcional ')' ':' tipo_estendido declaracoes_locais comandos 'fim_funcao' ;
 
 parametros_opcional	: parametro | /* epsilon */ ;
 
@@ -64,7 +64,7 @@ cmd	: 'leia' '(' identificador mais_ident ')'
 			| 'faca' comandos 'ate' expressao
 			| '^' IDENT outros_ident dimensao '<-' expressao
 			| IDENT chamada_atribuicao
-			| 'retorne' expressao ;
+			| cmdReturn='retorne' expressao ;
 
 mais_expressao : ',' expressao mais_expressao | /* epsilon */ ;
 
@@ -104,7 +104,7 @@ outros_fatores : op_multiplicacao fator outros_fatores  | /* epsilon */ ;
 
 parcela : op_unario parcela_unario | parcela_nao_unario ;
 
-parcela_unario : '^' IDENT outros_ident dimensao | IDENT chamada_partes | NUM_INT | NUM_REAL | '(' expressao ')' ;
+parcela_unario : '^' IDENT outros_ident dimensao | puNomeFuncao=IDENT chamada_partes | NUM_INT | NUM_REAL | '(' expressao ')' ;
 
 parcela_nao_unario : '&' IDENT outros_ident dimensao | CADEIA ;
 

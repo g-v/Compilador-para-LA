@@ -25,13 +25,13 @@ private Map<String, EntradaTS_STRCT> tabelaDeSimbolos;
         tabelaDeSimbolos.put(nome, etds);
     }
     
-    public boolean inserirVarEmSTRCT(String nome, String nomeVar, int tipoVar, int dimensaoVar) {
+    public boolean inserirVarEmSTRCT(String nome, String nomeVar, EntradaTS_TIPO tipoVar, int dimensaoVar, int nPonteiros) {
         EntradaTS_STRCT etds = verificar(nome);
         if(etds.verificarVar(nomeVar) != null)
             return false;
         else
         {
-            etds.inserirVar(nomeVar, tipoVar, dimensaoVar);
+            etds.inserirVar(nomeVar, tipoVar, dimensaoVar, nPonteiros);
             return true;
         }
     }

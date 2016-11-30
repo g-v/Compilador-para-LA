@@ -20,7 +20,7 @@ public class TabelaDeSimbolos_VAR {
         tabelaDeSimbolos = new HashMap<>();
     }
     
-    public void inserir(String nome, int tipo, int dimensao, int nPonteiros) {
+    public void inserir(String nome, EntradaTS_TIPO tipo, int dimensao, int nPonteiros) {
         EntradaTS_VAR etds = new EntradaTS_VAR();
         etds.nome = nome;
         etds.tipo = tipo;
