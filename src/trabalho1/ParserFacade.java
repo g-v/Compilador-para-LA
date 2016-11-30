@@ -102,7 +102,16 @@ public class ParserFacade {
         parser.removeErrorListeners();
         parser.addErrorListener(sintaxListener);
         
+        AnalisadorSemantico analisadorSemantico = new AnalisadorSemantico();
+        
         LAParser.ProgramaContext context = parser.programa();
+        
+        if(Example.modo == 2)
+        {
+            System.out.println("Iniciando analise semantica");
+            analisadorSemantico.visit(context);
+        }
+        
         writer.close();
         return context;
     }

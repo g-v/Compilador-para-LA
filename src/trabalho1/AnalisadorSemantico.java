@@ -24,6 +24,11 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     boolean isStructure;
     //tmp
 
+    public AnalisadorSemantico() {
+        tdsContext = new TDSContext();
+    }
+    
+    
     @Override
     public Void visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {
         if(ctx.dclLocalConst != null)
@@ -31,12 +36,13 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo_basico().getText());
             if(etds == null)
             {
-                //erro tipo nao declarado
+                System.err.println("erro: Tipo não declarado");
+                tipo.valor = 100;
             }else
             {
                 if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
                 {
-                    //erro, variavel ja declarada
+                    System.err.println("erro: Variável já declarada");
                 }else
                     tdsContext.insereVAR(ctx.IDENT().getText(), etds, 1, 0);
             }
@@ -81,7 +87,8 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo_estendido().tipo_basico_ident().getText());
             if(etds == null)
             {
-                //erro, tipo nao declarado
+                System.err.println("erro: Tipo não declarado");
+                tipo.valor = 100;
             }else
             {
                 tipo = etds;
@@ -110,16 +117,17 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
         
         if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
         {
-            //erro, variavel ja declarada
+            System.err.println("erro: Variável já declarada");
         }else
         {   
             nome = ctx.IDENT().getText() + "_anonSTRCT_";
             visitTipo(ctx.tipo());
             tdsContext.insereVAR(ctx.IDENT().getText(), tipo, Integer.parseInt(ctx.dimensao().getText()), 0);
-            if(ctx.mais_var() != null)
-            {
-                visitMais_var(ctx.mais_var());
-            }
+        }
+        
+        if(ctx.mais_var() != null)
+        {
+            visitMais_var(ctx.mais_var());
         }
         
         return null;
@@ -131,14 +139,14 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     public Void visitMais_var(LAParser.Mais_varContext ctx) {
         if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
         {
-            //erro, variavel ja declarada
+            System.err.println("erro: Variável já declarada");
         }else
         {
             tdsContext.insereVAR(ctx.IDENT().getText(), tipo, Integer.parseInt(ctx.dimensao().getText()), 0);
-                if(ctx.mais_var() != null)
-                    visitMais_var(ctx.mais_var());
-        
         }
+        
+        if(ctx.mais_var() != null)
+            visitMais_var(ctx.mais_var());
   
         return null;
     }
@@ -160,6 +168,8 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             if(entradaTipo == null)
             {
                 //erro, tipo de retorno nao declarado
+                entradaTipo = new EntradaTS_TIPO();
+                entradaTipo.valor = 100;
             }
         }
         
@@ -170,15 +180,17 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
         }
         else
         {
-
-            tdsContext.insereFUNC(nome, entradaTipo.valor, nPonteiros);
-
             tdsContext.setFUNCMode(nome);
-            //comeca a adicionar as variaveis ao procedimento
-            if(ctx.parametros_opcional().parametro() != null)
+            if(entradaTipo.valor != 100)
             {
-                visitParametros_opcional(ctx.parametros_opcional());
-                tdsContext.setNumeroArgumentosFunc(nome, nParametros);
+                tdsContext.insereFUNC(nome, entradaTipo.valor, nPonteiros);
+
+                //comeca a adicionar as variaveis ao procedimento
+                if(ctx.parametros_opcional().parametro() != null)
+                {
+                    visitParametros_opcional(ctx.parametros_opcional());
+                    tdsContext.setNumeroArgumentosFunc(nome, nParametros);
+                }
             }
         }
 
@@ -197,6 +209,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
         if(etds == null)
         {
             //erro, tipo nao declarado
+            tipo.valor = 100;
         }else
         {
             tipo = etds;
@@ -243,9 +256,12 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
             {
                 //erro, outro parametro com mesmo nome
+            }else
+            {
+                if(tipo.valor != 100)
+                    tdsContext.insereVAR(ctx.IDENT().getText(), tipo, Integer.parseInt(ctx.dimensao().getText()), nPonteiros);
             }
-                    
-            tdsContext.insereVAR(ctx.IDENT().getText(), tipo, Integer.parseInt(ctx.dimensao().getText()), nPonteiros);
+            
             nParametros++;
         }else
         {
