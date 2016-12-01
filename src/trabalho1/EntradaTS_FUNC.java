@@ -5,19 +5,31 @@
  */
 package trabalho1;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author Lucas
  */
 public class EntradaTS_FUNC extends EntradaTabelaDeSimbolos{
     int nArgumentos;
-    int tipoDeRetorno;
+    String tipoDeRetorno;
     int nPonteirosRetorno;
+    private Map<Integer, String> nomesArgumentos;
     TabelaDeSimbolos_VAR tabelaArgumentos;
 
     public EntradaTS_FUNC() {
         tabelaArgumentos = new TabelaDeSimbolos_VAR();
         nArgumentos = 0;
+        nomesArgumentos = new HashMap();
+    }
+    
+    public EntradaTS_VAR recuperarArgumento(int i)
+    {
+        if(!nomesArgumentos.containsKey(i))
+            return null;
+        else return verificarVar(nomesArgumentos.get(i));
     }
     
     public void inserirVar(String nome, EntradaTS_TIPO tipo, int dimensao, int nPonteiros) {

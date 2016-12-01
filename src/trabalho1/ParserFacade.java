@@ -53,7 +53,7 @@ public class ParserFacade {
             msg = msg.replaceAll("'", "");
             if(msg.charAt(0) == '"')
             {
-                msg = new String("");
+                msg = "";
                 msg += '"'  + " - simbolo nao identificado";
             }else if(msg.charAt(0) == '{')
             {
@@ -111,6 +111,8 @@ public class ParserFacade {
             System.out.println("Iniciando analise semantica");
             analisadorSemantico.visit(context);
         }
+        
+        System.err.flush();
         
         writer.close();
         return context;

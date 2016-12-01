@@ -2951,7 +2951,8 @@ public class LAParser extends Parser {
 	}
 
 	public static class Parcela_unarioContext extends ParserRuleContext {
-		public Token puNomeFuncao;
+		public Token puNomeIdent1;
+		public Token puNomeIdent2;
 		public TerminalNode NUM_REAL() { return getToken(LAParser.NUM_REAL, 0); }
 		public DimensaoContext dimensao() {
 			return getRuleContext(DimensaoContext.class,0);
@@ -2996,7 +2997,7 @@ public class LAParser extends Parser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(431); match(7);
-				setState(432); match(IDENT);
+				setState(432); ((Parcela_unarioContext)_localctx).puNomeIdent1 = match(IDENT);
 				setState(433); outros_ident();
 				setState(434); dimensao();
 				}
@@ -3004,7 +3005,7 @@ public class LAParser extends Parser {
 			case IDENT:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(436); ((Parcela_unarioContext)_localctx).puNomeFuncao = match(IDENT);
+				setState(436); ((Parcela_unarioContext)_localctx).puNomeIdent2 = match(IDENT);
 				setState(437); chamada_partes();
 				}
 				break;
@@ -3044,6 +3045,7 @@ public class LAParser extends Parser {
 	}
 
 	public static class Parcela_nao_unarioContext extends ParserRuleContext {
+		public Token pnuCadeia;
 		public DimensaoContext dimensao() {
 			return getRuleContext(DimensaoContext.class,0);
 		}
@@ -3089,7 +3091,7 @@ public class LAParser extends Parser {
 			case CADEIA:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(451); match(CADEIA);
+				setState(451); ((Parcela_nao_unarioContext)_localctx).pnuCadeia = match(CADEIA);
 				}
 				break;
 			default:

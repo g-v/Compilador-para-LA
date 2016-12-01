@@ -90,7 +90,7 @@ public class TDSContext {
         return tabelaDeTipos.verificar(nome);
     }
     
-    void insereFUNC(String nome, int tipoRetorno, int nPonteirosRetorno)
+    void insereFUNC(String nome, String tipoRetorno, int nPonteirosRetorno)
     {
         tabelaFunc.inserir(nome, tipoRetorno, nPonteirosRetorno);
     }
@@ -108,5 +108,11 @@ public class TDSContext {
     EntradaTS_FUNC verificaFUNC(String nome)
     {
         return tabelaFunc.verificar(nome);
+    }
+    
+    EntradaTS_VAR recuperaArg(int i)
+    {
+        EntradaTS_FUNC etds = verificaFUNC(nomeFUNC);
+        return etds.recuperarArgumento(i);
     }
 }

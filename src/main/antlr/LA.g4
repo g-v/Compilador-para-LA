@@ -104,11 +104,11 @@ outros_fatores : op_multiplicacao /* TIPO NUMERICO */ fator outros_fatores  | /*
 
 parcela : op_unario parcela_unario | parcela_nao_unario ;
 
-parcela_unario : '^' IDENT outros_ident dimensao /* TIPO STRUCT */ | puNomeFuncao=IDENT chamada_partes /* TIPO RETORNO FUNC */ | NUM_INT /* TIPO NUMERICO */ | NUM_REAL /* TIPO NUMERICO */ | '(' expressao ')' ;
+parcela_unario : '^' puNomeIdent1=IDENT outros_ident dimensao /* TIPO STRUCT */ | puNomeIdent2=IDENT chamada_partes /* TIPO RETORNO FUNC */ | NUM_INT /* TIPO NUMERICO */ | NUM_REAL /* TIPO NUMERICO */ | '(' expressao ')' ;
 
-parcela_nao_unario : '&' IDENT outros_ident dimensao /* TIPO STRUCT */ | CADEIA /* TIPO LITERAL*/ ;
+parcela_nao_unario : '&' IDENT outros_ident dimensao /* TIPO STRUCT */ | pnuCadeia=CADEIA /* TIPO LITERAL*/ ;
 
-outras_parcelas : '%' parcela outras_parcelas | /* epsilon */ ;
+outras_parcelas : '%' parcela outras_parcelas /* TIPO NUMERICO */ | /* epsilon */ ;
 
 chamada_partes : '(' expressao mais_expressao ')' | outros_ident dimensao | /* epsilon */ ;
 
