@@ -1,4 +1,4 @@
-// Generated from C:\Users\Lucas\Desktop\Compilador-para-LA-master\src\main\antlr\LA.g4 by ANTLR 4.2.2
+// Generated from C:\Users\Esquilo\Documents\GitHub\Compilador-para-LA\src\main\antlr\LA.g4 by ANTLR 4.2.2
 package trabalho1.parser;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -1676,6 +1676,7 @@ public class LAParser extends Parser {
 	}
 
 	public static class CmdContext extends ParserRuleContext {
+		public Token cmdAtribPonteiroIdent;
 		public Token cmdAtribuicaoIdent;
 		public Token cmdReturn;
 		public SelecaoContext selecao() {
@@ -1819,7 +1820,7 @@ public class LAParser extends Parser {
 				enterOuterAlt(_localctx, 8);
 				{
 				setState(324); match(7);
-				setState(325); match(IDENT);
+				setState(325); ((CmdContext)_localctx).cmdAtribPonteiroIdent = match(IDENT);
 				setState(326); outros_ident();
 				setState(327); dimensao();
 				setState(328); match(20);

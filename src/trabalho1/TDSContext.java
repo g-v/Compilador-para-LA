@@ -115,4 +115,46 @@ public class TDSContext {
         EntradaTS_FUNC etds = verificaFUNC(nomeFUNC);
         return etds.recuperarArgumento(i);
     }
+    
+    void insereConversaoDeTipo(String tipo, String convertePara)
+    {
+        EntradaTS_TIPO etds = verificaTIPO(tipo);
+        if(etds != null)
+            if(verificaTIPO(convertePara) != null)
+                etds.insereConversao(convertePara);
+    }
+    
+    boolean tiposEquivalentes(String tipo1, String tipo2, boolean doReverse)
+    {
+        boolean converte = false;
+        EntradaTS_TIPO etds = verificaTIPO(tipo1);
+        if(etds == null)
+            return false;
+        if(verificaTIPO(tipo2) == null)
+            return false;
+            
+        for(String t : etds.getConversoes())
+        {
+            converte = tipo1.equals(tipo2);
+            if(converte)
+                break;
+            
+            converte = tiposEquivalentes(t, tipo2, doReverse);
+            if(converte == true)
+                break;
+        }
+        if(converte == false && doReverse == true)
+        {
+            etds = verificaTIPO(tipo2);
+            
+            for(String t : etds.getConversoes())
+            {
+                converte = tiposEquivalentes(t, tipo2, doReverse);
+                if(converte == true)
+                    break;
+            }
+        }
+        
+        return converte;
+    }
 }

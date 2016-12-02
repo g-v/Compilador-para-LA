@@ -1,4 +1,4 @@
-// Generated from C:\Users\Lucas\Desktop\Compilador-para-LA-master\src\main\antlr\LA.g4 by ANTLR 4.2.2
+// Generated from C:\Users\Esquilo\Documents\GitHub\Compilador-para-LA\src\main\antlr\LA.g4 by ANTLR 4.2.2
 package trabalho1.parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;

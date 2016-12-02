@@ -24,6 +24,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     String tipoAlias;
     boolean isStructure;
     String tipoExpressao;
+    int nivelPonteirosTipo;
     int nExpressoes;
     //tmp
 
@@ -36,6 +37,9 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
         tdsContext.insereTIPO("literal", 2, 0, "tipo_basico", false);
         tdsContext.insereTIPO("logico", 3, 0, "tipo_basico", false);
         tdsContext.insereTIPO("erro", 100, 0, "tipo_basico", false);
+        
+        tdsContext.insereConversaoDeTipo("inteiro", "real");
+        tdsContext.insereConversaoDeTipo("real", "inteiro");
         
         nomeFuncao = "main";
     }
@@ -105,8 +109,13 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                 tipo.valor = 100;
             }else
             {
+                nPonteiros = 0;
+                if(ctx.tipo_estendido().ponteiros_opcionais().getText().isEmpty() == false)
+                {
+                    visitPonteiros_opcionais(ctx.tipo_estendido().ponteiros_opcionais());
+                }
+                
                 tipo = etds;
-                nPonteiros = ctx.tipo_estendido().ponteiros_opcionais().depth();
             }
         }
         
@@ -141,7 +150,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             if(ctx.dimensao().getText().isEmpty() == false)
                 dimensao = Integer.parseInt(ctx.dimensao().getText());
                 
-            tdsContext.insereVAR(ctx.IDENT().getText(), tipo, dimensao, 0);
+            tdsContext.insereVAR(ctx.IDENT().getText(), tipo, dimensao, nPonteiros);
         }
         
         if(ctx.mais_var().getText().isEmpty() == false)
@@ -187,7 +196,13 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
         else
         {
             nome = ctx.dclGlobalFuncao.getText();
-            nPonteiros = ctx.tipo_estendido().ponteiros_opcionais().depth();
+            
+            nPonteiros = 0;
+            if(ctx.tipo_estendido().ponteiros_opcionais().getText().isEmpty() == false)
+            {
+                visitPonteiros_opcionais(ctx.tipo_estendido().ponteiros_opcionais());
+            }
+            
             entradaTipo = tdsContext.verificaTIPO(ctx.tipo_estendido().tipo_basico_ident().getText());
             if(entradaTipo == null)
             {
@@ -227,6 +242,17 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     }
 
     @Override
+    public Void visitPonteiros_opcionais(LAParser.Ponteiros_opcionaisContext ctx) {
+        nPonteiros++;
+        if(ctx.ponteiros_opcionais().getText().isEmpty() == false)
+            visitPonteiros_opcionais(ctx.ponteiros_opcionais());
+        
+        return null;
+    }
+    
+    
+
+    @Override
     public Void visitParametro(LAParser.ParametroContext ctx) {
         
         EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo_estendido().tipo_basico_ident().getText());
@@ -237,7 +263,13 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
         }else
         {
             tipo = etds;
-            nPonteiros = ctx.tipo_estendido().ponteiros_opcionais().depth();
+            
+            nPonteiros = 0;
+            if(ctx.tipo_estendido().ponteiros_opcionais().getText().isEmpty() == false)
+            {
+                visitPonteiros_opcionais(ctx.tipo_estendido().ponteiros_opcionais());
+            }
+
         }
         
         visitIdentificador(ctx.identificador());
@@ -264,9 +296,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             {
                 //erro, tipo de retorno nao compativel com o pedido pela funcao
             }
-        }
-        
-        if(ctx.cmdAtribuicaoIdent != null)
+        }else if(ctx.cmdAtribuicaoIdent != null)
         {
             EntradaTS_VAR etds = tdsContext.verificaVAR(ctx.cmdAtribuicaoIdent.getText());
             if(etds == null)
@@ -287,6 +317,51 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                 }
                 tipoExpressao = etds.tipo.nome;
                 visitChamada_atribuicao(ctx.chamada_atribuicao());
+            }
+        }else if(ctx.cmdAtribPonteiroIdent != null)
+        {
+            EntradaTS_VAR etds = tdsContext.verificaVAR(ctx.cmdAtribPonteiroIdent.getText());
+            if(etds == null)
+                System.err.println("Linha " + ctx.start.getLine() + 
+                        ": identificador " + ctx.cmdAtribPonteiroIdent.getText() + " nao declarado");
+            else
+            {
+                String tmpNome = ctx.cmdAtribPonteiroIdent.getText();
+                if(ctx.outros_ident().getText().isEmpty() == false)
+                {
+                    tdsContext.enterSTRCTLevel(ctx.IDENT().getText());
+                    visitOutros_ident(ctx.outros_ident());
+                    tdsContext.leaveSTRCTLevel();
+                    tmpNome = nome;
+                    etds = tdsContext.verificaVAR(nome);
+                }else
+                {
+                    if(ctx.dimensao().getText().isEmpty() == false)
+                        if(Integer.parseInt(ctx.dimensao().getText()) > etds.dimensao)
+                        {
+                            //erro, tentativa de acesso incorreta ou fora do vetor
+                        }
+                }
+                if(etds.nPonteiros <= 0)
+                {
+                    //erro, tentativa de acessar endereco de identificador nao ponteiro
+                }
+                
+                visitExpressao(ctx.expressao());
+                if(nivelPonteirosTipo - (1 + etds.tipo.nPonteiros + etds.nPonteiros) < 0)
+                {
+                    //erro, erro de ponteiros na atribuicao
+                }
+
+                if(tipoExpressao.equals("erro"))
+                {
+                    System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para " + 
+                            tmpNome);
+                }else if(tdsContext.tiposEquivalentes(tipoExpressao, etds.tipo.nome, false) == false)
+                {
+                    System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para " + 
+                            tmpNome);
+                }
             }
         }
         
@@ -312,11 +387,11 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             visitExpressao(ctx.expressao());
             if(tipoExpressao.equals("erro"))
             {
-                System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para" + 
+                System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para " + 
                         tmpNome);
-            }else if(tipoIdent.equals(tipoExpressao) == false)
+            }else if(tdsContext.tiposEquivalentes(tipoExpressao, tipoIdent, false) == false)
             {
-                System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para" + 
+                System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para " + 
                         tmpNome);
             }
         }else
@@ -388,7 +463,28 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     public Void visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
         if(ctx.puNomeIdent1 != null)
         {
-            
+            EntradaTS_VAR etds = tdsContext.verificaVAR(ctx.IDENT().getText());
+            if(etds == null)
+                System.err.println("Linha " + ctx.start.getLine() + 
+                        ": identificador " + ctx.IDENT().getText() + " nao declarado");
+            else
+            {
+                if(ctx.outros_ident().getText().isEmpty() == false)
+                {
+                    tdsContext.enterSTRCTLevel(ctx.IDENT().getText());
+                    visitOutros_ident(ctx.outros_ident());
+                    tdsContext.leaveSTRCTLevel();
+                }else
+                {
+                    if(ctx.dimensao().getText().isEmpty() == false)
+                        if(Integer.parseInt(ctx.dimensao().getText()) > etds.dimensao)
+                        {
+                            //erro, tentativa de acesso incorreta ou fora do vetor
+                        }
+                    tipoExpressao = etds.tipo.nome;
+                    nivelPonteirosTipo = 1 + etds.tipo.nPonteiros;
+                }
+            }
         }else if(ctx.puNomeIdent2 != null)
         {
             if(ctx.chamada_partes().getText().isEmpty() == false 
@@ -561,13 +657,13 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                     tipoTermos = "literal";
             else
                 tipoTermos = "real";
-        }else
+        }else if(tipoExpressao.equals("erro"))
             tipoTermos = "erro";
         
-        if(ctx.termo() != null && ctx.outros_termos().getText().isEmpty() == false)
+        if(ctx.outros_termos() != null && ctx.outros_termos().getText().isEmpty() == false)
             visitOutros_termos(ctx.outros_termos());
         
-        if(tipoExpressao.equals("erro") == false)
+        if(tipoExpressao.equals("erro") == false && tipoTermos.isEmpty() == false)
             tipoExpressao = tipoTermos;
         
         return null;
@@ -584,12 +680,32 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
 
     @Override
     public Void visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) {
-        visitChildren(ctx);
         if (ctx.pnuCadeia != null)
             tipoExpressao = "literal";
         else
         {
-            //
+            EntradaTS_VAR etds = tdsContext.verificaVAR(ctx.IDENT().getText());
+            if(etds == null)
+                System.err.println("Linha " + ctx.start.getLine() + 
+                        ": identificador " + ctx.IDENT().getText() + " nao declarado");
+            else
+            {
+                if(ctx.outros_ident().getText().isEmpty() == false)
+                {
+                    tdsContext.enterSTRCTLevel(ctx.IDENT().getText());
+                    visitOutros_ident(ctx.outros_ident());
+                    tdsContext.leaveSTRCTLevel();
+                }else
+                {
+                    if(ctx.dimensao().getText().isEmpty() == false)
+                        if(Integer.parseInt(ctx.dimensao().getText()) > etds.dimensao)
+                        {
+                            //erro, tentativa de acesso incorreta ou fora do vetor
+                        }
+                    tipoExpressao = etds.tipo.nome;
+                    nivelPonteirosTipo = -1 + etds.tipo.nPonteiros;
+                }
+            }
         }
         return null;
     }

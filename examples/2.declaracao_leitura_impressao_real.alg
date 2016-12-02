@@ -1,33 +1,32 @@
-{ verificação se um projétil, lançado de um ângulo de a graus em relação ao solo colide ou não com um objeto situado em seu caminho, sabendo-se a distância do lançamento e a espessura e altura do objeto; o resultado produzido é verdadeiro se há colisão e falso caso contrário }
-
-{ A Figura 4-1 deve ser consultada para melhor referência (apostila de Construção de Algoritmos, página 24) }
+{ dada uma relação de preços e quantidade relativas a mídias de DVD virgens, calcular o valor total em estoque (em reais) e o preço médio da unidade de DVD; o fim dos dados é indicado por preço e quantidade iguais a zero }
 
 algoritmo
-	{ declarações }
 	declare
-		angulo, velocidadeInicial, distancia, espessura, altura,
-		momento1, momento2, alturaProjetil1, alturaProjetil2: real
+		numeroItens, quantidade: inteiro
 	declare
-		colidiu: logico
+		preco, valorTotal, somaUnitarios: real
 
-	colidiu <- "falso"
+	{ valores iniciais dos contadores }
+	numeroItens <- 0
+	valorTotal <- 0 + "NADA"
+	somaUnitarios <- 0
 
-	{ obtenção do ângulo, v0, distância do objeto, sua espessura e altura }
-	leia(angulo, velocidadeInicial, distancia, espessura, altura)
+	{ leitura dos dados }
+	leia(preco, quantidade)
+	enquanto preco_final <> 0 e quantidade <> 0 faca
+		{ conta e acumula }
+		numeroItens <- numeroItens + 1
+		valorTotal <- valorTotal + preco * quantidade
+		somaUnitarios <- somaUnitarios + preco
+		{ obtém o próximo item }
+		leia(preco, quantidade)
+	fim_enquanto
 
-	{ cálculo dos momentos em que o projétil passa pelos limites do objeto }
-	momento1 <- distancia
-	momento2 <- (distancia + espessura)/velocidadeInicial
-
-	{ cálculo da altura do projétil nestes dois momentos }
-	alturaProjetil1 <- velocidadeInicial
-
-	alturaProjetil2 <- velocidadeInicial
-
-	{ verificação se em algum desses dois momentos o projétil não está acima da altura do objeto }
-	colidiu <- alturaProjetil1 <= altura e alturaProjetil2 <= altura
-
-	{ escrita do resultado }
- 	escreva("Houve colisao?", colisao) { escreve "V" ou "F" }
-
+	{ resultados }
+	escreva("Valor total: R$", valorTotal)
+	se numeroItens = 0 entao
+		escreva("Nao eh possivel calcular o preco medio unitario")
+	senao
+		escreva("Valor unitario medio: R$", 1.0 * somaUnitarios/numeroItens)
+	fim_se
 fim_algoritmo
