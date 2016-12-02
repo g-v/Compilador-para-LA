@@ -1676,6 +1676,7 @@ public class LAParser extends Parser {
 	}
 
 	public static class CmdContext extends ParserRuleContext {
+		public Token cmdAtribuicaoIdent;
 		public Token cmdReturn;
 		public SelecaoContext selecao() {
 			return getRuleContext(SelecaoContext.class,0);
@@ -1828,7 +1829,7 @@ public class LAParser extends Parser {
 			case IDENT:
 				enterOuterAlt(_localctx, 9);
 				{
-				setState(331); match(IDENT);
+				setState(331); ((CmdContext)_localctx).cmdAtribuicaoIdent = match(IDENT);
 				setState(332); chamada_atribuicao();
 				}
 				break;
@@ -3831,6 +3832,8 @@ public class LAParser extends Parser {
 	}
 
 	public static class Parcela_logicaContext extends ParserRuleContext {
+		public Token plTRUE;
+		public Token plFALSE;
 		public Exp_relacionalContext exp_relacional() {
 			return getRuleContext(Exp_relacionalContext.class,0);
 		}
@@ -3862,13 +3865,13 @@ public class LAParser extends Parser {
 			case 19:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(510); match(19);
+				setState(510); ((Parcela_logicaContext)_localctx).plTRUE = match(19);
 				}
 				break;
 			case 41:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(511); match(41);
+				setState(511); ((Parcela_logicaContext)_localctx).plFALSE = match(41);
 				}
 				break;
 			case 7:

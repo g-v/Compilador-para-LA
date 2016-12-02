@@ -63,7 +63,7 @@ cmd	: 'leia' '(' identificador mais_ident ')'
 			| 'enquanto' expressao 'faca' comandos 'fim_enquanto'
 			| 'faca' comandos 'ate' expressao
 			| '^' IDENT outros_ident dimensao '<-' expressao
-			| IDENT chamada_atribuicao
+			| cmdAtribuicaoIdent=IDENT chamada_atribuicao
 			| cmdReturn='retorne' expressao ;
 
 mais_expressao : ',' expressao mais_expressao | /* epsilon */ ;
@@ -104,11 +104,11 @@ outros_fatores : op_multiplicacao /* TIPO NUMERICO */ fator outros_fatores  | /*
 
 parcela : op_unario parcela_unario | parcela_nao_unario ;
 
-parcela_unario : '^' IDENT outros_ident dimensao /* TIPO STRUCT */ | puNomeFuncao=IDENT chamada_partes /* TIPO RETORNO FUNC */ | NUM_INT /* TIPO NUMERICO */ | NUM_REAL /* TIPO NUMERICO */ | '(' expressao ')' ;
+parcela_unario : '^' puNomeIdent1=IDENT outros_ident dimensao /* TIPO STRUCT */ | puNomeIdent2=IDENT chamada_partes /* TIPO RETORNO FUNC */ | NUM_INT /* TIPO NUMERICO */ | NUM_REAL /* TIPO NUMERICO */ | '(' expressao ')' ;
 
-parcela_nao_unario : '&' IDENT outros_ident dimensao /* TIPO STRUCT */ | CADEIA /* TIPO LITERAL*/ ;
+parcela_nao_unario : '&' IDENT outros_ident dimensao /* TIPO STRUCT */ | pnuCadeia=CADEIA /* TIPO LITERAL*/ ;
 
-outras_parcelas : '%' parcela outras_parcelas | /* epsilon */ ;
+outras_parcelas : '%' parcela outras_parcelas /* TIPO NUMERICO */ | /* epsilon */ ;
 
 chamada_partes : '(' expressao mais_expressao ')' | outros_ident dimensao | /* epsilon */ ;
 
@@ -130,7 +130,7 @@ outros_fatores_logicos : 'e' fator_logico /* TIPO LOGICO */ outros_fatores_logic
 
 fator_logico : op_nao parcela_logica ;
 
-parcela_logica : 'verdadeiro' /* TIPO LOGICO */ |  'falso' /* TIPO LOGICO */ | exp_relacional ;
+parcela_logica : plTRUE='verdadeiro' /* TIPO LOGICO */ |  plFALSE='falso' /* TIPO LOGICO */ | exp_relacional ;
 
 
                   

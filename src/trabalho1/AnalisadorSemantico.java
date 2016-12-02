@@ -20,6 +20,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     int nPonteiros;
     int nParametros;
     String nome;
+    String nomeFuncao;
     String tipoAlias;
     boolean isStructure;
     String tipoExpressao;
@@ -34,6 +35,9 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
         tdsContext.insereTIPO("real", 1, 0, "tipo_basico", false);
         tdsContext.insereTIPO("literal", 2, 0, "tipo_basico", false);
         tdsContext.insereTIPO("logico", 3, 0, "tipo_basico", false);
+        tdsContext.insereTIPO("erro", 100, 0, "tipo_basico", false);
+        
+        nomeFuncao = "main";
     }
     
     
@@ -127,19 +131,20 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
         
         if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
         {
-            System.err.println("erro: Variável já declarada");
+            System.err.println("Linha " + ctx.start.getLine() + ": identificador " + 
+                        ctx.IDENT().getText() + " ja declarado anteriormente");
         }else
         {   
             nome = ctx.IDENT().getText() + "_anonSTRCT_";
             visitTipo(ctx.tipo());
             int dimensao = 0;
-            if(ctx.dimensao().isEmpty() != false)
+            if(ctx.dimensao().getText().isEmpty() == false)
                 dimensao = Integer.parseInt(ctx.dimensao().getText());
                 
             tdsContext.insereVAR(ctx.IDENT().getText(), tipo, dimensao, 0);
         }
         
-        if(ctx.mais_var().isEmpty() != false)
+        if(ctx.mais_var().getText().isEmpty() == false)
         {
             visitMais_var(ctx.mais_var());
         }
@@ -153,17 +158,18 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     public Void visitMais_var(LAParser.Mais_varContext ctx) {
         if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
         {
-            System.err.println("erro: Variável já declarada");
+            System.err.println("Linha " + ctx.start.getLine() + ": identificador " + 
+                        ctx.IDENT().getText() + " ja declarado anteriormente");
         }else
         {
             int dimensao = 0;
-            if(ctx.dimensao().isEmpty() != false)
+            if(ctx.dimensao().getText().isEmpty() == false)
                 dimensao = Integer.parseInt(ctx.dimensao().getText());
             
             tdsContext.insereVAR(ctx.IDENT().getText(), tipo, dimensao, 0);
         }
         
-        if(ctx.mais_var().isEmpty() != false)
+        if(ctx.mais_var().getText().isEmpty() == false)
             visitMais_var(ctx.mais_var());
   
         return null;
@@ -260,8 +266,64 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             }
         }
         
+        if(ctx.cmdAtribuicaoIdent != null)
+        {
+            EntradaTS_VAR etds = tdsContext.verificaVAR(ctx.cmdAtribuicaoIdent.getText());
+            if(etds == null)
+            {
+                System.err.println("Linha " + ctx.start.getLine() + 
+                        ": identificador " + ctx.IDENT().getText() + " nao declarado");
+            }else
+            {
+                if(ctx.chamada_atribuicao().dimensao().getText().isEmpty() == false)
+                        if(Integer.parseInt(ctx.chamada_atribuicao().dimensao().getText()) > etds.dimensao)
+                        {
+                            //erro, tentativa de acesso incorreta ou fora do vetor
+                        }
+                    
+                if(ctx.chamada_atribuicao().expressao().getText().isEmpty() == false)
+                {
+                    nome = ctx.cmdAtribuicaoIdent.getText();
+                }
+                tipoExpressao = etds.tipo.nome;
+                visitChamada_atribuicao(ctx.chamada_atribuicao());
+            }
+        }
+        
         visitChildren(ctx);
         
+        return null;
+    }
+
+    @Override
+    public Void visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
+        String tmpNome = nome;
+        String tipoIdent = tipoExpressao;
+        if(ctx.expressao().getText().isEmpty() == false)
+        {
+            if(ctx.outros_ident().getText().isEmpty() == false)
+            {
+                tdsContext.enterSTRCTLevel(nome);
+                visitOutros_ident(ctx.outros_ident());
+                tdsContext.leaveSTRCTLevel();
+                tipoIdent = tipoExpressao;
+            }
+            nome = tmpNome;
+            visitExpressao(ctx.expressao());
+            if(tipoExpressao.equals("erro"))
+            {
+                System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para" + 
+                        tmpNome);
+            }else if(tipoIdent.equals(tipoExpressao) == false)
+            {
+                System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para" + 
+                        tmpNome);
+            }
+        }else
+        {
+            if(ctx.argumentos_opcional().getText().isEmpty() == false)
+                visitArgumentos_opcional(ctx.argumentos_opcional());
+        }
         return null;
     }
     
@@ -292,7 +354,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             {
             
                 int dimensao = 0;
-                if(ctx.dimensao().isEmpty() != false)
+                if(ctx.dimensao().getText().isEmpty() == false)
                     Integer.parseInt(ctx.dimensao().getText());
 
                 if(dimensao > etds.dimensao)
@@ -300,7 +362,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                     //erro, tentativa de acesso incorreta ou fora do vetor
                 }
 
-                if(ctx.outros_ident().isEmpty() != false)
+                if(ctx.outros_ident().getText().isEmpty() == false)
                 {
                     if(etds.tipo.isStructure == false)
                     {
@@ -314,6 +376,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                 }else
                 {
                     tipoExpressao = tdsContext.verificaVAR(ctx.IDENT().getText()).tipo.nome;
+                    nome = ctx.IDENT().getText();
                 }
             }
         }
@@ -328,8 +391,10 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             
         }else if(ctx.puNomeIdent2 != null)
         {
-            if(ctx.chamada_partes().expressao().isEmpty() == false)
+            if(ctx.chamada_partes().getText().isEmpty() == false 
+                    && ctx.expressao().getText().isEmpty() == false)
             {
+                String a = ctx.puNomeIdent2.getText();
                 EntradaTS_FUNC etds = tdsContext.verificaFUNC(ctx.puNomeIdent2.getText());
                 if(etds == null)
                 {
@@ -337,8 +402,9 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                 }
                 else
                 {
-                    nome = ctx.puNomeIdent2.getText();
+                    nomeFuncao = ctx.puNomeIdent2.getText();
                     visitChamada_partes(ctx.chamada_partes());
+                    nomeFuncao = "main";
                     
                     tipoExpressao = etds.tipoDeRetorno;
                 }
@@ -351,23 +417,25 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                         ": identificador " + ctx.IDENT().getText() + " nao declarado");
                 }else
                 {
-                    if(ctx.chamada_partes().dimensao().isEmpty() == false)
+                    if(ctx.chamada_partes().dimensao().getText().isEmpty() == false)
                         if(Integer.parseInt(ctx.chamada_partes().dimensao().getText()) > etds.dimensao)
                         {
                             //erro, tentativa de acesso incorreta ou fora do vetor
                         }
                     
-                    if(ctx.chamada_partes().outros_ident().isEmpty() == false)
+                    if(ctx.chamada_partes().outros_ident().getText().isEmpty() == false)
                     {
                         tdsContext.enterSTRCTLevel(ctx.puNomeIdent2.getText());
                         visitOutros_ident(ctx.chamada_partes().outros_ident());
                         tdsContext.leaveSTRCTLevel();
                     }
+                    
+                    tipoExpressao = etds.tipo.nome;
                 }
             }
-        }else if(ctx.NUM_INT() != null)
+        }else if(ctx.NUM_INT() != null && ctx.NUM_INT().getText().isEmpty() == false)
             tipoExpressao = "inteiro";
-        else if(ctx.NUM_REAL() != null)
+        else if(ctx.NUM_REAL() != null && ctx.NUM_REAL().getText().isEmpty() == false)
             tipoExpressao = "real";
         else
             visitExpressao(ctx.expressao());
@@ -383,9 +451,10 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
 
     @Override
     public Void visitMais_expressao(LAParser.Mais_expressaoContext ctx) {
-        visitExpressao(ctx.expressao());
+        if(ctx.expressao() != null)
+            visitExpressao(ctx.expressao());
         
-        if(nome.contains("main") == false)
+        if(nomeFuncao.equals("main") == false)
         {
             tdsContext.setFUNCMode(nome);
 
@@ -402,10 +471,9 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             }
 
             tdsContext.leaveFUNCMode();
-            nome = "main";
         }
         
-        if(ctx.mais_expressao().isEmpty() == false)
+        if(ctx.mais_expressao() != null && ctx.mais_expressao().getText().isEmpty() == false)
             visitMais_expressao(ctx.mais_expressao());
         
         return null;
@@ -413,30 +481,34 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
 
     @Override
     public Void visitChamada_partes(LAParser.Chamada_partesContext ctx) {
-        nExpressoes = 0;
-        visitExpressao(ctx.expressao());
-        
-        tdsContext.setFUNCMode(nome);
-        
-        if(tdsContext.recuperaArg(0).valor != tdsContext.verificaTIPO(tipoExpressao).valor)
+        if(ctx.expressao().getText().isEmpty() == false)
         {
-            //erro, tipo do argumento 0 incompativel com o pedido pela funcao
+            nExpressoes = 0;
+            visitExpressao(ctx.expressao());
+
+            tdsContext.setFUNCMode(nome);
+
+            if(tdsContext.recuperaArg(0).valor != tdsContext.verificaTIPO(tipoExpressao).valor)
+            {
+                //erro, tipo do argumento 0 incompativel com o pedido pela funcao
+            }
+
+            tdsContext.leaveFUNCMode();
+
+            if(ctx.mais_expressao().getText().isEmpty() == false)
+                visitMais_expressao(ctx.mais_expressao());
+
+            EntradaTS_FUNC etds = tdsContext.verificaFUNC(tdsContext.nomeFUNC);
+
+            if(nExpressoes > etds.nArgumentos)
+            {
+                //erro, numero de argumentos acima do pedido pela funcao
+            }else if(nExpressoes < etds.nArgumentos)
+            {
+                //erro, numero de argumentos insuficiente
+            }
         }
         
-        tdsContext.leaveFUNCMode();
-        
-        if(ctx.mais_expressao().isEmpty() == false)
-            visitMais_expressao(ctx.mais_expressao());
-        
-        EntradaTS_FUNC etds = tdsContext.verificaFUNC(tdsContext.nomeFUNC);
-        
-        if(nExpressoes > etds.nArgumentos)
-        {
-            //erro, numero de argumentos acima do pedido pela funcao
-        }else if(nExpressoes < etds.nArgumentos)
-        {
-            //erro, numero de argumentos insuficiente
-        }
         return null;
     }
     
@@ -445,21 +517,68 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     @Override
     public Void visitOp_unario(LAParser.Op_unarioContext ctx) {
         visitChildren(ctx);
-        tipoExpressao = "real";
+        if(ctx.getText().isEmpty() == false)
+            tipoExpressao = "real";
+        
         return null;
     }
 
     @Override
     public Void visitOutros_termos(LAParser.Outros_termosContext ctx) {
-        visitChildren(ctx);
-        tipoExpressao = "real";
+        String tipoTermos = new String();
+        int tmpTipo = -1;
+        boolean isAdicao = false;
+        EntradaTS_TIPO etds = tdsContext.verificaTIPO(tipoExpressao);
+        
+        if(ctx.termo() != null && ctx.termo().getText().isEmpty() == false)
+        {
+            if(ctx.op_adicao().getText().equals("-"))
+            {
+                if(etds.valor == 2)
+                {
+                    //erro, operacao ilegal para o tipo literal
+                }else
+                {
+                    tipoTermos = "real";
+                }
+            }else
+            {
+                tmpTipo = etds.valor;
+                isAdicao = true;
+            }
+            
+            visitTermo(ctx.termo());
+        }
+        
+        if(tipoExpressao.equals("erro") == false && isAdicao == true)
+        {
+            etds = tdsContext.verificaTIPO(tipoExpressao);
+            if(tmpTipo == 2 || etds.valor == 2)
+                if(tmpTipo != etds.valor)
+                {
+                    tipoTermos = "erro";
+                }else
+                    tipoTermos = "literal";
+            else
+                tipoTermos = "real";
+        }else
+            tipoTermos = "erro";
+        
+        if(ctx.termo() != null && ctx.outros_termos().getText().isEmpty() == false)
+            visitOutros_termos(ctx.outros_termos());
+        
+        if(tipoExpressao.equals("erro") == false)
+            tipoExpressao = tipoTermos;
+        
         return null;
     }
 
     @Override
     public Void visitOutros_fatores(LAParser.Outros_fatoresContext ctx) {
         visitChildren(ctx);
-        tipoExpressao = "real";
+        if(ctx.getText().isEmpty() == false)
+            tipoExpressao = "real";
+        
         return null;
     }
 
@@ -478,34 +597,47 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     @Override
     public Void visitOp_nao(LAParser.Op_naoContext ctx) {
         visitChildren(ctx);
-        tipoExpressao = "logico";
+        if(ctx.getText().isEmpty() == false)
+            tipoExpressao = "logico";
+        
         return null;
     }
 
     @Override
     public Void visitOp_opcional(LAParser.Op_opcionalContext ctx) {
         visitChildren(ctx);
-        tipoExpressao = "logico";
+        if(ctx.getText().isEmpty() == false)
+            tipoExpressao = "logico";
+        
         return null;
     }
     @Override
     public Void visitOutros_termos_logicos(LAParser.Outros_termos_logicosContext ctx) {
         visitChildren(ctx);
-        tipoExpressao = "logico";
+        if(ctx.getText().isEmpty() == false)
+            tipoExpressao = "logico";
+        
         return null;
     }
 
     @Override
     public Void visitParcela_logica(LAParser.Parcela_logicaContext ctx) {
         visitChildren(ctx);
-        tipoExpressao = "logico";
+        if(ctx.getText().isEmpty() == false)
+        {
+            if(ctx.plTRUE != null|| ctx.plFALSE != null)
+                tipoExpressao = "logico";
+        }
+        
         return null;
     }
 
     @Override
     public Void visitOutros_fatores_logicos(LAParser.Outros_fatores_logicosContext ctx) {
         visitChildren(ctx);
-        tipoExpressao = "logico";
+        if(ctx.getText().isEmpty() == false)
+            tipoExpressao = "logico";
+        
         return null;
     }
     

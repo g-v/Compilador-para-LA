@@ -63,7 +63,7 @@ cmd	: 'leia' '(' identificador mais_ident ')'
 			| 'enquanto' expressao 'faca' comandos 'fim_enquanto'
 			| 'faca' comandos 'ate' expressao
 			| '^' IDENT outros_ident dimensao '<-' expressao
-			| IDENT chamada_atribuicao
+			| cmdAtribuicaoIdent=IDENT chamada_atribuicao
 			| cmdReturn='retorne' expressao ;
 
 mais_expressao : ',' expressao mais_expressao | /* epsilon */ ;
@@ -130,7 +130,7 @@ outros_fatores_logicos : 'e' fator_logico /* TIPO LOGICO */ outros_fatores_logic
 
 fator_logico : op_nao parcela_logica ;
 
-parcela_logica : 'verdadeiro' /* TIPO LOGICO */ |  'falso' /* TIPO LOGICO */ | exp_relacional ;
+parcela_logica : plTRUE='verdadeiro' /* TIPO LOGICO */ |  plFALSE='falso' /* TIPO LOGICO */ | exp_relacional ;
 
 
                   
