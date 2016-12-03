@@ -143,12 +143,20 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             System.err.println("Linha " + ctx.start.getLine() + ": identificador " + 
                         ctx.IDENT().getText() + " ja declarado anteriormente");
         }else
-        {   
-            nome = ctx.IDENT().getText() + "_anonSTRCT_";
-            visitTipo(ctx.tipo());
+        {
+            
             int dimensao = 0;
             if(ctx.dimensao().getText().isEmpty() == false)
                 dimensao = Integer.parseInt(ctx.dimensao().getText());
+            
+            nome = ctx.IDENT().getText() + "_anonSTRCT_";
+            String tmpNome = nome;
+            visitTipo(ctx.tipo());
+            if(ctx.tipo().registro() != null && ctx.tipo().registro().getText().isEmpty() == false)
+            {
+                tdsContext.insereTIPO(tmpNome, tipo.valor, 0, "estrutura", true);
+                tipo = tdsContext.verificaTIPO(tmpNome);
+            }
                 
             tdsContext.insereVAR(ctx.IDENT().getText(), tipo, dimensao, nPonteiros);
         }
@@ -329,7 +337,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                 String tmpNome = ctx.cmdAtribPonteiroIdent.getText();
                 if(ctx.outros_ident().getText().isEmpty() == false)
                 {
-                    tdsContext.enterSTRCTLevel(ctx.IDENT().getText());
+                    tdsContext.enterSTRCTLevel(etds.tipo.nome);
                     visitOutros_ident(ctx.outros_ident());
                     tdsContext.leaveSTRCTLevel();
                     tmpNome = nome;
@@ -348,18 +356,19 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                 }
                 
                 visitExpressao(ctx.expressao());
-                if(nivelPonteirosTipo - (1 + etds.tipo.nPonteiros + etds.nPonteiros) < 0)
+                if(nivelPonteirosTipo - (etds.tipo.nPonteiros + etds.nPonteiros - 1) < 0)
                 {
-                    //erro, erro de ponteiros na atribuicao
+                    System.err.println("Linha " + ctx.start.getLine() + ": erro de ponteiros na atribuicao para ^" + 
+                            tmpNome);
                 }
 
                 if(tipoExpressao.equals("erro"))
                 {
-                    System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para " + 
+                    System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para ^" + 
                             tmpNome);
                 }else if(tdsContext.tiposEquivalentes(tipoExpressao, etds.tipo.nome, false) == false)
                 {
-                    System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para " + 
+                    System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para ^" + 
                             tmpNome);
                 }
             }
@@ -378,13 +387,24 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
         {
             if(ctx.outros_ident().getText().isEmpty() == false)
             {
-                tdsContext.enterSTRCTLevel(nome);
+                EntradaTS_VAR etds = tdsContext.verificaVAR(nome);
+                tdsContext.enterSTRCTLevel(etds.tipo.nome);
                 visitOutros_ident(ctx.outros_ident());
                 tdsContext.leaveSTRCTLevel();
                 tipoIdent = tipoExpressao;
             }
             nome = tmpNome;
+            
+            EntradaTS_VAR etds = tdsContext.verificaVAR(nome);
+            
             visitExpressao(ctx.expressao());
+            
+            if(nivelPonteirosTipo - (etds.tipo.nPonteiros + etds.nPonteiros) != 0)
+            {
+                System.err.println("Linha " + ctx.start.getLine() + ": erro de ponteiros na atribuicao para " + 
+                        tmpNome);
+            }
+            
             if(tipoExpressao.equals("erro"))
             {
                 System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para " + 
@@ -420,6 +440,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             nParametros++;
         }else
         {
+            String a = ctx.IDENT().getText();
             EntradaTS_VAR etds = tdsContext.verificaVAR(ctx.IDENT().getText());
             if(etds == null)
             {
@@ -444,7 +465,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                         //erro, identificador nao e estrutura
                     }else
                     {
-                        tdsContext.enterSTRCTLevel(ctx.IDENT().getText());
+                        tdsContext.enterSTRCTLevel(etds.tipo.nome);
                         visitOutros_ident(ctx.outros_ident());
                         tdsContext.leaveSTRCTLevel();
                     }
@@ -471,7 +492,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             {
                 if(ctx.outros_ident().getText().isEmpty() == false)
                 {
-                    tdsContext.enterSTRCTLevel(ctx.IDENT().getText());
+                    tdsContext.enterSTRCTLevel(etds.tipo.nome);
                     visitOutros_ident(ctx.outros_ident());
                     tdsContext.leaveSTRCTLevel();
                 }else
@@ -482,7 +503,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                             //erro, tentativa de acesso incorreta ou fora do vetor
                         }
                     tipoExpressao = etds.tipo.nome;
-                    nivelPonteirosTipo = 1 + etds.tipo.nPonteiros;
+                    nivelPonteirosTipo = -1 + etds.tipo.nPonteiros;
                 }
             }
         }else if(ctx.puNomeIdent2 != null)
@@ -490,7 +511,6 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             if(ctx.chamada_partes().getText().isEmpty() == false 
                     && ctx.expressao().getText().isEmpty() == false)
             {
-                String a = ctx.puNomeIdent2.getText();
                 EntradaTS_FUNC etds = tdsContext.verificaFUNC(ctx.puNomeIdent2.getText());
                 if(etds == null)
                 {
@@ -521,12 +541,11 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                     
                     if(ctx.chamada_partes().outros_ident().getText().isEmpty() == false)
                     {
-                        tdsContext.enterSTRCTLevel(ctx.puNomeIdent2.getText());
+                        tdsContext.enterSTRCTLevel(etds.tipo.nome);
                         visitOutros_ident(ctx.chamada_partes().outros_ident());
                         tdsContext.leaveSTRCTLevel();
-                    }
-                    
-                    tipoExpressao = etds.tipo.nome;
+                    }else
+                        tipoExpressao = etds.tipo.nome;
                 }
             }
         }else if(ctx.NUM_INT() != null && ctx.NUM_INT().getText().isEmpty() == false)
@@ -692,7 +711,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             {
                 if(ctx.outros_ident().getText().isEmpty() == false)
                 {
-                    tdsContext.enterSTRCTLevel(ctx.IDENT().getText());
+                    tdsContext.enterSTRCTLevel(etds.tipo.nome);
                     visitOutros_ident(ctx.outros_ident());
                     tdsContext.leaveSTRCTLevel();
                 }else
@@ -703,7 +722,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                             //erro, tentativa de acesso incorreta ou fora do vetor
                         }
                     tipoExpressao = etds.tipo.nome;
-                    nivelPonteirosTipo = -1 + etds.tipo.nPonteiros;
+                    nivelPonteirosTipo = 1 + etds.tipo.nPonteiros;
                 }
             }
         }
