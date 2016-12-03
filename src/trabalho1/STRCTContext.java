@@ -45,9 +45,9 @@ public class STRCTContext {
             mode = 0;
     }
     
-    void enterSTRCTLevel(String nomeEstrutura)
+    void enterSTRCTLevel()
     {
-        EntradaTS_STRCT etds = tabelaDeEstruturas.verificar(nomeEstrutura);
+        EntradaTS_STRCT etds = tabelaDeEstruturas.verificar(structName);
         if(etds == null)
             return;
         else
@@ -60,8 +60,10 @@ public class STRCTContext {
     
     void leaveSTRCTLevel()
     {
-        tabelaDeEstruturas = paiStack.pop();
-        if(paiStack.isEmpty() == true)
+        if(paiStack.isEmpty() == false)
+        {
+            tabelaDeEstruturas = paiStack.pop();
+        }else
             mode = 0;
         
     }

@@ -14,6 +14,7 @@ public class TDSContext {
     
     TabelaDeSimbolos_FUNC tabelaFunc;
     TabelaDeSimbolos_TIPOS tabelaDeTipos;
+    TabelaDeSimbolos_IDENT tabelaIdent;
     
     int STRCTLevel;
     boolean FUNCMode;
@@ -23,6 +24,7 @@ public class TDSContext {
         structContext = new STRCTContext(new TabelaDeSimbolos_STRCT(), new TabelaDeSimbolos_VAR());
         tabelaFunc = new TabelaDeSimbolos_FUNC();
         tabelaDeTipos = new TabelaDeSimbolos_TIPOS();
+        tabelaIdent = new TabelaDeSimbolos_IDENT();
         
         STRCTLevel = 0;
         FUNCMode = false;
@@ -31,6 +33,8 @@ public class TDSContext {
     void setCurrentStructure(String name)
     {
         structContext.setSTRCTContext(name);
+        if(STRCTLevel == 0)
+            STRCTLevel++;
     }
     
     void setNoStructure()
@@ -38,9 +42,9 @@ public class TDSContext {
         structContext.setSTRCTContext(0);
     }
     
-    void enterSTRCTLevel(String nomeEstrutura)
+    void enterSTRCTLevel()
     {
-        structContext.enterSTRCTLevel(nomeEstrutura);
+        structContext.enterSTRCTLevel();
         STRCTLevel++;
     }
     
@@ -67,10 +71,32 @@ public class TDSContext {
         FUNCMode = false;
     }
     
+    void insereIDENT(String nome)
+    {
+        tabelaIdent.inserir(nome);
+    }
+    
+    EntradaTabelaDeSimbolos verificaIDENT(String nome)
+    {
+        return tabelaIdent.verificar(nome);
+    }
+    
+    boolean confirmaIdent(String nome)
+    {
+        if(verificaIDENT(nome) == null)
+        {
+            insereIDENT(nome);
+            return true;
+        }else
+            return false;
+    }
+    
     void insereVAR(String nome, EntradaTS_TIPO tipo, int dimensao, int nPonteiros)
     {
         if(FUNCMode == false)
+        {
             structContext.insereVariavel(nome, tipo, dimensao, nPonteiros);
+        }
         else
             tabelaFunc.inserirVarEmFUNC(nome, nomeFUNC, tipo, dimensao, nPonteiros);
     }
@@ -128,18 +154,24 @@ public class TDSContext {
     {
         boolean converte = false;
         EntradaTS_TIPO etds = verificaTIPO(tipo1);
+        EntradaTS_TIPO etdsAlias;
         if(etds == null)
             return false;
         if(verificaTIPO(tipo2) == null)
             return false;
-            
+        
+        if(tipo1.equals(tipo2))
+            return true;
+        
         for(String t : etds.getConversoes())
         {
-            converte = tipo1.equals(tipo2);
-            if(converte)
+            converte = t.equals(tipo2);
+            if(converte == true)
                 break;
             
-            converte = tiposEquivalentes(t, tipo2, doReverse);
+            etdsAlias = verificaTIPO(t);
+            if(etdsAlias.tipoAlias != null)
+                converte = etdsAlias.tipoAlias.equals(tipo2);
             if(converte == true)
                 break;
         }
@@ -149,7 +181,12 @@ public class TDSContext {
             
             for(String t : etds.getConversoes())
             {
-                converte = tiposEquivalentes(t, tipo2, doReverse);
+                converte = t.equals(tipo1);
+                if(converte == true)
+                    break;
+                
+                etdsAlias = verificaTIPO(t);
+                converte = etdsAlias.tipoAlias.equals(tipo1);
                 if(converte == true)
                     break;
             }

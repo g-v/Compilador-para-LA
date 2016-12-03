@@ -24,8 +24,11 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     String tipoAlias;
     boolean isStructure;
     String tipoExpressao;
+    String acumulaIdent;
+    String identAtribuicao;
     int nivelPonteirosTipo;
     int nExpressoes;
+    boolean resetAcumulaIdent;
     //tmp
 
     public AnalisadorSemantico() {
@@ -42,6 +45,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
         tdsContext.insereConversaoDeTipo("real", "inteiro");
         
         nomeFuncao = "main";
+        resetAcumulaIdent = true;
     }
     
     
@@ -57,9 +61,10 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                 tipo.valor = 100;
             }else
             {
-                if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
+                if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null || 
+                        tdsContext.verificaTIPO(ctx.IDENT().getText()) != null)
                 {
-                    System.err.println("erro: Variável já declarada");
+                    System.err.println("erro: Identificador já declarado");
                 }else
                     tdsContext.insereVAR(ctx.IDENT().getText(), etds, 1, 0);
             }
@@ -67,7 +72,13 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
         {
             nome = ctx.dclLocalTipo.getText();
             visitTipo(ctx.tipo());
-            tdsContext.insereTIPO(nome, tdsContext.tabelaDeTipos.indiceAtual + 1, nPonteiros, tipoAlias, isStructure);
+            if(ctx.tipo().registro().getText().isEmpty() == false)
+                isStructure = true;
+            else
+                isStructure = false;
+            
+            tdsContext.insereTIPO(ctx.dclLocalTipo.getText(), tdsContext.tabelaDeTipos.indiceAtual + 1, 
+                    nPonteiros, tipoAlias, isStructure);
         }else // variavel
         {
             visitVariavel(ctx.variavel());
@@ -77,45 +88,50 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
 
     @Override
     public Void visitTipo(LAParser.TipoContext ctx) {
-        if(ctx.registro() != null)
+        if(tdsContext.verificaTIPO(nome) != null || tdsContext.verificaVAR(nome) != null)
+            System.err.println("Linha " + ctx.start.getLine() + ": identificador " + 
+                        nome + " ja declarado anteriormente");
+        else
         {
-            if(isStructure == true)
-                tdsContext.enterSTRCTLevel(nome);
-            else
+            if(ctx.registro() != null)
+            {
+                if(tdsContext.STRCTLevel > 0)
+                    tdsContext.enterSTRCTLevel();
+
                 tdsContext.setCurrentStructure(nome);
-            
-            isStructure = true;
-            nPonteiros = 0;
-            
-            visitRegistro(ctx.registro());
-            tdsContext.setNoStructure();
-            
-            isStructure = false;
-            
-            if(tdsContext.getSTRCTLevel() > 0)
-                tdsContext.leaveSTRCTLevel();
-            
-            tipo.valor = tdsContext.tabelaDeTipos.indiceAtual + 1;
-            tipoAlias = "registro";
-        }else //tipo estendido
-        {
-            isStructure = false;
-            tipoAlias = ctx.tipo_estendido().tipo_basico_ident().getText();
-            EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo_estendido().tipo_basico_ident().getText());
-            if(etds == null)
-            {
-                System.err.println("Linha " + ctx.start.getLine() + ": tipo " + 
-                        ctx.tipo_estendido().tipo_basico_ident().getText() + " nao declarado");
-                tipo.valor = 100;
-            }else
-            {
+
+                isStructure = true;
                 nPonteiros = 0;
-                if(ctx.tipo_estendido().ponteiros_opcionais().getText().isEmpty() == false)
+
+                visitRegistro(ctx.registro());
+                tdsContext.leaveSTRCTLevel();
+
+                isStructure = false;
+
+                tdsContext.leaveSTRCTLevel();
+
+                tipo.valor = tdsContext.tabelaDeTipos.indiceAtual + 1;
+                tipoAlias = "registro";
+            }else //tipo estendido
+            {
+                isStructure = false;
+                tipoAlias = ctx.tipo_estendido().tipo_basico_ident().getText();
+                EntradaTS_TIPO etds = tdsContext.verificaTIPO(ctx.tipo_estendido().tipo_basico_ident().getText());
+                if(etds == null)
                 {
-                    visitPonteiros_opcionais(ctx.tipo_estendido().ponteiros_opcionais());
+                    System.err.println("Linha " + ctx.start.getLine() + ": tipo " + 
+                            ctx.tipo_estendido().tipo_basico_ident().getText() + " nao declarado");
+                    tipo.valor = 100;
+                }else
+                {
+                    nPonteiros = 0;
+                    if(ctx.tipo_estendido().ponteiros_opcionais().getText().isEmpty() == false)
+                    {
+                        visitPonteiros_opcionais(ctx.tipo_estendido().ponteiros_opcionais());
+                    }
+
+                    tipo = etds;
                 }
-                
-                tipo = etds;
             }
         }
         
@@ -138,29 +154,30 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     @Override
     public Void visitVariavel(LAParser.VariavelContext ctx) {
         
-        if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
+        nome = ctx.IDENT().getText() + "_anonSTRCT_";
+        String tmpNome = nome;
+
+        visitTipo(ctx.tipo());
+        if(ctx.tipo().registro() != null && ctx.tipo().registro().getText().isEmpty() == false)
+        {
+            tdsContext.insereTIPO(tmpNome, tipo.valor, 0, "estrutura", true);
+            tipo = tdsContext.verificaTIPO(tmpNome);
+        }
+        
+        if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null ||
+                tdsContext.verificaTIPO(ctx.IDENT().getText()) != null)
         {
             System.err.println("Linha " + ctx.start.getLine() + ": identificador " + 
                         ctx.IDENT().getText() + " ja declarado anteriormente");
         }else
         {
-            
             int dimensao = 0;
             if(ctx.dimensao().getText().isEmpty() == false)
                 dimensao = Integer.parseInt(ctx.dimensao().getText());
             
-            nome = ctx.IDENT().getText() + "_anonSTRCT_";
-            String tmpNome = nome;
-            visitTipo(ctx.tipo());
-            if(ctx.tipo().registro() != null && ctx.tipo().registro().getText().isEmpty() == false)
-            {
-                tdsContext.insereTIPO(tmpNome, tipo.valor, 0, "estrutura", true);
-                tipo = tdsContext.verificaTIPO(tmpNome);
-            }
-                
             tdsContext.insereVAR(ctx.IDENT().getText(), tipo, dimensao, nPonteiros);
         }
-        
+            
         if(ctx.mais_var().getText().isEmpty() == false)
         {
             visitMais_var(ctx.mais_var());
@@ -173,7 +190,8 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     
     @Override
     public Void visitMais_var(LAParser.Mais_varContext ctx) {
-        if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null)
+        if(tdsContext.verificaVAR(ctx.IDENT().getText()) != null ||
+                tdsContext.verificaTIPO(ctx.IDENT().getText()) != null)
         {
             System.err.println("Linha " + ctx.start.getLine() + ": identificador " + 
                         ctx.IDENT().getText() + " ja declarado anteriormente");
@@ -335,9 +353,16 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             else
             {
                 String tmpNome = ctx.cmdAtribPonteiroIdent.getText();
+                acumulaIdent = tmpNome;
+                identAtribuicao = tmpNome;
                 if(ctx.outros_ident().getText().isEmpty() == false)
                 {
-                    tdsContext.enterSTRCTLevel(etds.tipo.nome);
+                    identAtribuicao += ctx.outros_ident().getText();
+                    acumulaIdent += ".";
+                    if(tdsContext.STRCTLevel > 0)
+                        tdsContext.enterSTRCTLevel();
+                    
+                    tdsContext.setCurrentStructure(etds.tipo.nome);
                     visitOutros_ident(ctx.outros_ident());
                     tdsContext.leaveSTRCTLevel();
                     tmpNome = nome;
@@ -383,46 +408,73 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
     public Void visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
         String tmpNome = nome;
         String tipoIdent = tipoExpressao;
-        if(ctx.expressao().getText().isEmpty() == false)
+        
+        EntradaTS_VAR etds = tdsContext.verificaVAR(nome);
+        if(etds == null)
+            System.err.println("Linha " + ctx.start.getLine() + 
+                    ": identificador " + nome + " nao declarado");
+        else
         {
-            if(ctx.outros_ident().getText().isEmpty() == false)
+            if(ctx.expressao().getText().isEmpty() == false)
             {
-                EntradaTS_VAR etds = tdsContext.verificaVAR(nome);
-                tdsContext.enterSTRCTLevel(etds.tipo.nome);
-                visitOutros_ident(ctx.outros_ident());
-                tdsContext.leaveSTRCTLevel();
-                tipoIdent = tipoExpressao;
+                acumulaIdent = tmpNome;
+                identAtribuicao = tmpNome;
+                if(ctx.outros_ident().getText().isEmpty() == false)
+                {
+                    identAtribuicao += ctx.outros_ident().getText();
+                    if(etds.tipo.isStructure == false)
+                    {
+                        //erro, identificador nao e estrutura
+                    }else
+                    {
+                        acumulaIdent += ".";
+                        if(tdsContext.STRCTLevel > 0)
+                            tdsContext.enterSTRCTLevel();
+
+                        tdsContext.setCurrentStructure(etds.tipo.nome);
+                        visitOutros_ident(ctx.outros_ident());
+                        tdsContext.leaveSTRCTLevel();
+                        tipoIdent = tipoExpressao;
+                    }
+                }
+                nome = tmpNome;
+
+                visitExpressao(ctx.expressao());
+
+                if(nivelPonteirosTipo - (etds.tipo.nPonteiros + etds.nPonteiros) != 0)
+                {
+                    System.err.println("Linha " + ctx.start.getLine() + ": erro de ponteiros na atribuicao para " + 
+                            acumulaIdent);
+                }
+
+                if(tipoExpressao.equals("erro"))
+                {
+                    System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para " + 
+                            identAtribuicao);
+                }else if(tdsContext.tiposEquivalentes(tipoExpressao, tipoIdent, false) == false)
+                {
+                    System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para " + 
+                            identAtribuicao);
+                }
+            }else
+            {
+                if(ctx.argumentos_opcional().getText().isEmpty() == false)
+                    visitArgumentos_opcional(ctx.argumentos_opcional());
             }
-            nome = tmpNome;
-            
-            EntradaTS_VAR etds = tdsContext.verificaVAR(nome);
-            
-            visitExpressao(ctx.expressao());
-            
-            if(nivelPonteirosTipo - (etds.tipo.nPonteiros + etds.nPonteiros) != 0)
-            {
-                System.err.println("Linha " + ctx.start.getLine() + ": erro de ponteiros na atribuicao para " + 
-                        tmpNome);
-            }
-            
-            if(tipoExpressao.equals("erro"))
-            {
-                System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para " + 
-                        tmpNome);
-            }else if(tdsContext.tiposEquivalentes(tipoExpressao, tipoIdent, false) == false)
-            {
-                System.err.println("Linha " + ctx.start.getLine() + ": atribuicao nao compativel para " + 
-                        tmpNome);
-            }
-        }else
-        {
-            if(ctx.argumentos_opcional().getText().isEmpty() == false)
-                visitArgumentos_opcional(ctx.argumentos_opcional());
         }
         return null;
     }
-    
-    
+
+    @Override
+    public Void visitOutros_ident(LAParser.Outros_identContext ctx) {
+        if(ctx.identificador() != null && ctx.identificador().getText().isEmpty() == false)
+        {
+            resetAcumulaIdent = false;
+            visitIdentificador(ctx.identificador());
+        }
+        
+        return null;
+    }
     
     @Override
     public Void visitIdentificador(LAParser.IdentificadorContext ctx) {
@@ -440,15 +492,21 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             nParametros++;
         }else
         {
+            if(resetAcumulaIdent == true)
+                acumulaIdent = "";
+            else
+                resetAcumulaIdent = true;
+            
             String a = ctx.IDENT().getText();
             EntradaTS_VAR etds = tdsContext.verificaVAR(ctx.IDENT().getText());
             if(etds == null)
             {
+                String ruleString = ctx.outros_ident().getText();
+                
                 System.err.println("Linha " + ctx.start.getLine() + 
-                        ": identificador " + ctx.IDENT().getText() + " nao declarado");
+                        ": identificador " + acumulaIdent + ctx.IDENT().getText() + ruleString + " nao declarado");
             }else
             {
-            
                 int dimensao = 0;
                 if(ctx.dimensao().getText().isEmpty() == false)
                     Integer.parseInt(ctx.dimensao().getText());
@@ -462,15 +520,21 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                 {
                     if(etds.tipo.isStructure == false)
                     {
-                        //erro, identificador nao e estrutura
+                        System.err.println("Linha " + ctx.start.getLine() + 
+                        ": identificador " + ctx.IDENT().getText() + " nao e estrutura");
                     }else
                     {
-                        tdsContext.enterSTRCTLevel(etds.tipo.nome);
+                        acumulaIdent += ctx.IDENT().getText() + ".";
+                        if(tdsContext.STRCTLevel > 0)
+                            tdsContext.enterSTRCTLevel();
+                        
+                        tdsContext.setCurrentStructure(etds.tipo.nome);
                         visitOutros_ident(ctx.outros_ident());
                         tdsContext.leaveSTRCTLevel();
                     }
                 }else
                 {
+                    acumulaIdent += ctx.IDENT().getText();
                     tipoExpressao = tdsContext.verificaVAR(ctx.IDENT().getText()).tipo.nome;
                     nome = ctx.IDENT().getText();
                 }
@@ -492,9 +556,18 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             {
                 if(ctx.outros_ident().getText().isEmpty() == false)
                 {
-                    tdsContext.enterSTRCTLevel(etds.tipo.nome);
-                    visitOutros_ident(ctx.outros_ident());
-                    tdsContext.leaveSTRCTLevel();
+                    if(etds.tipo.isStructure == false)
+                    {
+                        //erro, identificador nao e estrutura
+                    }else
+                    {
+                        if(tdsContext.STRCTLevel > 0)
+                            tdsContext.enterSTRCTLevel();
+
+                        tdsContext.setCurrentStructure(etds.tipo.nome);
+                        visitOutros_ident(ctx.outros_ident());
+                        tdsContext.leaveSTRCTLevel();
+                    }
                 }else
                 {
                     if(ctx.dimensao().getText().isEmpty() == false)
@@ -508,8 +581,8 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             }
         }else if(ctx.puNomeIdent2 != null)
         {
-            if(ctx.chamada_partes().getText().isEmpty() == false 
-                    && ctx.expressao().getText().isEmpty() == false)
+            if(ctx.chamada_partes() != null && ctx.chamada_partes().getText().isEmpty() == false 
+                    && ctx.expressao() != null && ctx.expressao().getText().isEmpty() == false)
             {
                 EntradaTS_FUNC etds = tdsContext.verificaFUNC(ctx.puNomeIdent2.getText());
                 if(etds == null)
@@ -526,11 +599,13 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                 }
             }else
             {
+                acumulaIdent = "";
                 EntradaTS_VAR etds = tdsContext.verificaVAR(ctx.puNomeIdent2.getText());
                 if(etds == null)
                 {
+                    String ruleString = ctx.chamada_partes().outros_ident().getText();
                     System.err.println("Linha " + ctx.start.getLine() + 
-                        ": identificador " + ctx.IDENT().getText() + " nao declarado");
+                        ": identificador " + acumulaIdent + ctx.IDENT().getText() + ruleString + " nao declarado");
                 }else
                 {
                     if(ctx.chamada_partes().dimensao().getText().isEmpty() == false)
@@ -541,11 +616,24 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
                     
                     if(ctx.chamada_partes().outros_ident().getText().isEmpty() == false)
                     {
-                        tdsContext.enterSTRCTLevel(etds.tipo.nome);
-                        visitOutros_ident(ctx.chamada_partes().outros_ident());
-                        tdsContext.leaveSTRCTLevel();
+                        if(etds.tipo.isStructure == false)
+                        {
+                            //erro, identificador nao e estrutura
+                        }else
+                        {
+                            acumulaIdent = "." + ctx.puNomeIdent2.getText();
+                            if(tdsContext.STRCTLevel > 0)
+                                tdsContext.enterSTRCTLevel();
+
+                            tdsContext.setCurrentStructure(etds.tipo.nome);
+                            visitOutros_ident(ctx.chamada_partes().outros_ident());
+                            tdsContext.leaveSTRCTLevel();
+                        }
                     }else
+                    {
                         tipoExpressao = etds.tipo.nome;
+                        acumulaIdent = ctx.puNomeIdent2.getText();
+                    }
                 }
             }
         }else if(ctx.NUM_INT() != null && ctx.NUM_INT().getText().isEmpty() == false)
@@ -711,9 +799,18 @@ public class AnalisadorSemantico extends LABaseVisitor<Void>{
             {
                 if(ctx.outros_ident().getText().isEmpty() == false)
                 {
-                    tdsContext.enterSTRCTLevel(etds.tipo.nome);
-                    visitOutros_ident(ctx.outros_ident());
-                    tdsContext.leaveSTRCTLevel();
+                    if(etds.tipo.isStructure == false)
+                    {
+                        //erro, identificador nao e estrutura
+                    }else
+                    {
+                        if(tdsContext.STRCTLevel > 0)
+                            tdsContext.enterSTRCTLevel();
+
+                        tdsContext.setCurrentStructure(etds.tipo.nome);
+                        visitOutros_ident(ctx.outros_ident());
+                        tdsContext.leaveSTRCTLevel();
+                    }
                 }else
                 {
                     if(ctx.dimensao().getText().isEmpty() == false)

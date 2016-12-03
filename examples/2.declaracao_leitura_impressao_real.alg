@@ -1,15 +1,30 @@
-{ determinar, em R3, qual de dois pontos é o mais próximo da origem }
+{ dados o nome, o preço e o tipo dos vinhos (indicados aqui por "T" para tinto, "B" para branco ou "R" para rosê, descrever o vinho mais caro; não são considerados vinhos de preços iguais; fim dos dados indicado por nome = "fim" }
 
 algoritmo
+	tipo tVinho: registro
+						nome,
+						tipoVinho: literal
+						preco: real
+					fim_registro
 	declare
-		ponto1, ponto2: registro
-								x, y, z: real
-							fim_registro
+		tVinho, vinho, vinhoCaro: tVinho
 
-	ponto1.x <- "teste"
+	{ repetição para leitura dos dados }
+	vinhoCaro.preco <- -1 	{ para forçar a troca na primeira vez }
+	faca	
+		{ dados }
+		leia(vinho.nome, vinho.Preco, vinho.tipoVinho)
 
-	{ leitura das coordenadas dos pontos }
-	leia(ponto1.x, ponto1.y, ponto1.z)
-	leia(ponto2.x, ponto2.y, ponto2.z)
-	
+		{ verificação do maior preço }
+		se vinho.preco > vinhoCaro.preco e vinho.nome <> "fim" entao
+			vinhoCaro <- vinho 		{ copia tudo }
+		fim_se
+	ate vinho.nome = "fim"
+
+	{ apresentação do resultado }
+	se vinhoCaro.preco = -1 entao
+		escreva("Nenhum vinho foi apresentado.")
+	senao
+		escreva(vinhoCaro.nome, vinhoCaro.preco, vinhocaro.tipoVinho)
+	fim_se
 fim_algoritmo
