@@ -1,0 +1,16 @@
+//////
+/*
+
+Regras prontas
+
+- programa
+- variavel
+- mais var
+- dimensao
+- 
+
+
+
+
+Para terminar:
+- exp aritmetica
