@@ -1,4 +1,4 @@
-// Generated from /home/akari/Downloads/teste gradle/Compilador-para-LA-master/src/main/antlr/LA.g4 by ANTLR 4.2.2
+// Generated from /home/akari/Documentos/T1/compilador2/Compilador-para-LA/src/main/antlr/LA.g4 by ANTLR 4.2.2
 package trabalho1.parser;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -464,6 +464,7 @@ public class LAParser extends Parser {
 	}
 
 	public static class IdentificadorContext extends ParserRuleContext {
+		public String tipoIdent;
 		public DimensaoContext dimensao() {
 			return getRuleContext(DimensaoContext.class,0);
 		}
@@ -1676,7 +1677,8 @@ public class LAParser extends Parser {
 	}
 
 	public static class CmdContext extends ParserRuleContext {
-		public Mais_identContext leiaMaisIdent;
+		public IdentificadorContext idLeia;
+		public Mais_identContext maisIdLeia;
 		public Token cmdAtribPonteiroIdent;
 		public Token cmdAtribuicaoIdent;
 		public Token cmdReturn;
@@ -1747,8 +1749,8 @@ public class LAParser extends Parser {
 				{
 				setState(277); match(58);
 				setState(278); match(13);
-				setState(279); identificador();
-				setState(280); ((CmdContext)_localctx).leiaMaisIdent = mais_ident();
+				setState(279); ((CmdContext)_localctx).idLeia = identificador();
+				setState(280); ((CmdContext)_localctx).maisIdLeia = mais_ident();
 				setState(281); match(55);
 				}
 				break;
