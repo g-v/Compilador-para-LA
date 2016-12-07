@@ -62,8 +62,8 @@ cmd	: 'leia' '(' identificador mais_ident ')'
 			| 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' comandos 'fim_para'
 			| 'enquanto' expressao 'faca' comandos 'fim_enquanto'
 			| 'faca' comandos 'ate' expressao
-			| '^' cmdAtribPonteiroIdent=IDENT outros_ident dimensao '<-' expressao
-			| cmdAtribuicaoIdent=IDENT chamada_atribuicao
+			| '^' IDENT outros_ident dimensao '<-' expressao
+			| IDENT chamada_atribuicao
 			| cmdReturn='retorne' expressao ;
 
 mais_expressao : ',' expressao mais_expressao | /* epsilon */ ;
@@ -86,7 +86,7 @@ numero_intervalo : op_unario NUM_INT intervalo_opcional ;
 
 intervalo_opcional : '..' op_unario NUM_INT | /* epsilon */ ;
 
-op_unario : '-' /* TIPO NUMERICO */ | /* epsilon */ ;
+op_unario : '-' | /* epsilon */ ;
 
 exp_aritmetica : termo outros_termos ;
 
@@ -96,41 +96,41 @@ op_adicao : '+' | '-' ;
 
 termo : fator outros_fatores ;
 
-outros_termos : op_adicao /* TIPO NUMERICO */ termo outros_termos | /* epsilon */ ;
+outros_termos : op_adicao termo outros_termos | /* epsilon */ ;
 
 fator : parcela outras_parcelas ;
 
-outros_fatores : op_multiplicacao /* TIPO NUMERICO */ fator outros_fatores  | /* epsilon */ ;
+outros_fatores : op_multiplicacao fator outros_fatores  | /* epsilon */ ;
 
 parcela : op_unario parcela_unario | parcela_nao_unario ;
 
-parcela_unario : '^' puNomeIdent1=IDENT outros_ident dimensao /* TIPO STRUCT */ | puNomeIdent2=IDENT chamada_partes /* TIPO RETORNO FUNC */ | NUM_INT /* TIPO NUMERICO */ | NUM_REAL /* TIPO NUMERICO */ | '(' expressao ')' ;
+parcela_unario : '^' IDENT outros_ident dimensao | puNomeFuncao=IDENT chamada_partes | NUM_INT | NUM_REAL | '(' expressao ')' ;
 
-parcela_nao_unario : '&' IDENT outros_ident dimensao /* TIPO STRUCT */ | pnuCadeia=CADEIA /* TIPO LITERAL*/ ;
+parcela_nao_unario : '&' IDENT outros_ident dimensao | CADEIA ;
 
-outras_parcelas : '%' parcela outras_parcelas /* TIPO NUMERICO */ | /* epsilon */ ;
+outras_parcelas : '%' parcela outras_parcelas | /* epsilon */ ;
 
 chamada_partes : '(' expressao mais_expressao ')' | outros_ident dimensao | /* epsilon */ ;
 
 exp_relacional : exp_aritmetica op_opcional ;
 
-op_opcional : op_relacional exp_aritmetica /* TIPO LOGICO */ | /* epsilon */ ;
+op_opcional : op_relacional exp_aritmetica | /* epsilon */ ;
 
 op_relacional : '='  | '<>' | '>=' | '<=' | '>' | '<' ;
 
 expressao : termo_logico outros_termos_logicos ;
 
-op_nao : 'nao' /* TIPO LOGICO */ | /* epsilon */ ;
+op_nao : 'nao' | /* epsilon */ ;
 
 termo_logico : fator_logico outros_fatores_logicos ;
 
-outros_termos_logicos : 'ou' termo_logico /* TIPO LOGICO */ outros_termos_logicos | /* epsilon */ ;
+outros_termos_logicos : 'ou' termo_logico outros_termos_logicos | /* epsilon */ ;
 
-outros_fatores_logicos : 'e' fator_logico /* TIPO LOGICO */ outros_fatores_logicos | /* epsilon */ ;
+outros_fatores_logicos : 'e' fator_logico outros_fatores_logicos | /* epsilon */ ;
 
 fator_logico : op_nao parcela_logica ;
 
-parcela_logica : plTRUE='verdadeiro' /* TIPO LOGICO */ |  plFALSE='falso' /* TIPO LOGICO */ | exp_relacional ;
+parcela_logica : 'verdadeiro' |  'falso' | exp_relacional ;
 
 
                   

@@ -1,30 +1,18 @@
-{ dados o nome, o preço e o tipo dos vinhos (indicados aqui por "T" para tinto, "B" para branco ou "R" para rosê, descrever o vinho mais caro; não são considerados vinhos de preços iguais; fim dos dados indicado por nome = "fim" }
+{ dados, separadamente, prenome e sobrenome, escrevê-los em dois formatos: "Fulano Tal" e "Tal, F." }
 
 algoritmo
-	tipo tVinho: registro
-						nome,
-						tipoVinho: literal
-						preco: real
-					fim_registro
-	declare
-		tVinho, vinho, vinhoCaro: tVinho
+	declare prenome, sobrenome,
+		formato1, formato2: literal
 
-	{ repetição para leitura dos dados }
-	vinhoCaro.preco <- -1 	{ para forçar a troca na primeira vez }
-	faca	
-		{ dados }
-		leia(vinho.nome, vinho.Preco, vinho.tipoVinho)
+	{ obtenção dos nomes }
+	leia(prenome, sobrenome)
 
-		{ verificação do maior preço }
-		se vinho.preco > vinhoCaro.preco e vinho.nome <> "fim" entao
-			vinhoCaro <- vinho 		{ copia tudo }
-		fim_se
-	ate vinho.nome = "fim"
+	{ composição dos nomes }
+	formato1 <- prenome + " " + sobrenome
+	formato2 <- sobrenome + ", " + subLiteral(prenome, 1, 1) + "."
 
-	{ apresentação do resultado }
-	se vinhoCaro.preco = -1 entao
-		escreva("Nenhum vinho foi apresentado.")
-	senao
-		escreva(vinhoCaro.nome, vinhoCaro.preco, vinhocaro.tipoVinho)
-	fim_se
+	{ resultados 
+	escreva(formato1)
+	escreva(formato2)
+
 fim_algoritmo

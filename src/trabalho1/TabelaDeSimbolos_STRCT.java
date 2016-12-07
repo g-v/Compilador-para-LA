@@ -32,7 +32,6 @@ private Map<String, EntradaTS_STRCT> tabelaDeSimbolos;
         else
         {
             etds.inserirVar(nomeVar, tipoVar, dimensaoVar, nPonteiros);
-            tabelaDeSimbolos.put(nome, etds);
             return true;
         }
     }

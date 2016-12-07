@@ -19,7 +19,7 @@ public class TabelaDeSimbolos_FUNC {
         tabelaDeSimbolos = new HashMap<>();
     }
     
-    public void inserir(String nome, String tipoRetorno, int nPonteirosRetorno) {
+    public void inserir(String nome, int tipoRetorno, int nPonteirosRetorno) {
         EntradaTS_FUNC etds = new EntradaTS_FUNC();
         etds.nome = nome;
         etds.tipoDeRetorno = tipoRetorno;

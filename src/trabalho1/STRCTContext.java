@@ -24,7 +24,6 @@ public class STRCTContext {
     {
         tabelaDeEstruturas = tabela;
         tabelaVARBase = tabelaBase;
-        paiStack = new Stack<>();
         mode = 0;
     }
     
@@ -45,14 +44,13 @@ public class STRCTContext {
             mode = 0;
     }
     
-    void enterSTRCTLevel()
+    void enterSTRCTLevel(String nomeEstrutura)
     {
-        EntradaTS_STRCT etds = tabelaDeEstruturas.verificar(structName);
+        EntradaTS_STRCT etds = tabelaDeEstruturas.verificar(nomeEstrutura);
         if(etds == null)
             return;
         else
         {
-            mode = 1;
             paiStack.push(tabelaDeEstruturas);
             tabelaDeEstruturas = etds.estruturasAninhadas;
         }
@@ -60,12 +58,7 @@ public class STRCTContext {
     
     void leaveSTRCTLevel()
     {
-        if(paiStack.isEmpty() == false)
-        {
-            tabelaDeEstruturas = paiStack.pop();
-        }else
-            mode = 0;
-        
+        tabelaDeEstruturas = paiStack.pop();
     }
     
     void insereVariavel(String nome, EntradaTS_TIPO tipo, int dimensao, int nPonteiros)
