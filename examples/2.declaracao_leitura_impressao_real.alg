@@ -1,8 +1,8 @@
 algoritmo
   declare
-    x, oi, aueh: real
+    myFloat1, myFloat2, myFloat3: real
   declare
-    aueh: inteiro
-  leia(x)
-  escreva(x)
+    myInteger: inteiro
+  leia(myInteger)
+  escreva(myInteger)
 fim_algoritmo

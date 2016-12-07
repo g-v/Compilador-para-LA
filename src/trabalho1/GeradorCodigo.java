@@ -40,12 +40,12 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
     @Override
     public Void visitPrograma(LAParser.ProgramaContext ctx) {
         visitDeclaracoes(ctx.declaracoes());
-        System.out.print("typedef int bool\n");
+        System.out.print("typedef int bool;\n");
         System.out.print("#define true 1\n");
         System.out.print("#define false 0\n\n\n");
         System.out.print("int main() {\n");
         visitCorpo(ctx.corpo());
-        System.out.print("  return 0;\n}\n");
+        System.out.print("return 0;\n}\n");
         return null;
     }
 
