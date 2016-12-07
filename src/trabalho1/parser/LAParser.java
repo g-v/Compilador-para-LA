@@ -3215,6 +3215,8 @@ public class LAParser extends Parser {
 	}
 
 	public static class Chamada_partesContext extends ParserRuleContext {
+		public Token idAbre;
+		public Token idFecha;
 		public ExpressaoContext expressao() {
 			return getRuleContext(ExpressaoContext.class,0);
 		}
@@ -3255,10 +3257,10 @@ public class LAParser extends Parser {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(461); match(13);
+				setState(461); ((Chamada_partesContext)_localctx).idAbre = match(13);
 				setState(462); expressao();
 				setState(463); mais_expressao();
-				setState(464); match(55);
+				setState(464); ((Chamada_partesContext)_localctx).idFecha = match(55);
 				}
 				break;
 
