@@ -1679,6 +1679,10 @@ public class LAParser extends Parser {
 	public static class CmdContext extends ParserRuleContext {
 		public IdentificadorContext idLeia;
 		public Mais_identContext maisIdLeia;
+		public ExpressaoContext idEscreva;
+		public Mais_expressaoContext maisIdEscreva;
+		public ExpressaoContext idIf;
+		public ComandosContext idComandos;
 		public Token cmdAtribPonteiroIdent;
 		public Token cmdAtribuicaoIdent;
 		public Token cmdReturn;
@@ -1759,8 +1763,8 @@ public class LAParser extends Parser {
 				{
 				setState(283); match(52);
 				setState(284); match(13);
-				setState(285); expressao();
-				setState(286); mais_expressao();
+				setState(285); ((CmdContext)_localctx).idEscreva = expressao();
+				setState(286); ((CmdContext)_localctx).maisIdEscreva = mais_expressao();
 				setState(287); match(55);
 				}
 				break;
@@ -1768,9 +1772,9 @@ public class LAParser extends Parser {
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(289); match(45);
-				setState(290); expressao();
+				setState(290); ((CmdContext)_localctx).idIf = expressao();
 				setState(291); match(16);
-				setState(292); comandos();
+				setState(292); ((CmdContext)_localctx).idComandos = comandos();
 				setState(293); senao_opcional();
 				setState(294); match(37);
 				}
