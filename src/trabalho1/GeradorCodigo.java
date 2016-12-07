@@ -109,30 +109,10 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
             }
         }
         
-        // LEIA
+        // ESCREVA
         if(ctx.identificador()!= null && ctx.identificador().getText().isEmpty() == false){
         
-            String tipo = variaveisTipos.get(ctx.identificador().IDENT().getText());
-            System.out.print("scanf(\"" + variaveisScanf.get(tipo) + "\", ");
-            if(!tipo.equals("char*")) {
-                System.out.print("&");
-            }
-            visitIdentificador(ctx.identificador());
-            System.out.print(");\n");
-            
-            LAParser.Mais_identContext pointer = ctx.mais_ident();
-            
-            while(pointer != null && pointer.getText().isEmpty() == false){
-                tipo = variaveisTipos.get(pointer.identificador().IDENT().getText());
-                System.out.print("scanf(\"" + variaveisScanf.get(tipo) + "\", ");
-                if(!tipo.equals("char*")) {
-                    System.out.print("&");
-                }
-                visitIdentificador(pointer.identificador());
-                System.out.print(");\n");
-                if(pointer.mais_ident() != null)
-                    pointer = pointer.mais_ident();
-            }
+       
         }
             
         return null;

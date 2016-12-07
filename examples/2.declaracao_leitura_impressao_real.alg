@@ -5,8 +5,6 @@ algoritmo
     y, p: inteiro
   declare
     aueh: literal
-  leia(x, u, aueh, y, oi, p)
-	leia(u, p)
-leia(x)
+  leia(x, u)
   escreva(x)
 fim_algoritmo

@@ -14,7 +14,7 @@ variavel : IDENT dimensao mais_var ':' tipo ;
 
 mais_var : ',' IDENT dimensao mais_var | /* epsilon */ ;
 
-identificador : ponteiros_opcionais IDENT dimensao outros_ident ;
+identificador returns [ String tipoIdent ] : ponteiros_opcionais IDENT dimensao outros_ident ;
 
 ponteiros_opcionais : '^' ponteiros_opcionais | /* epsilon */ ;
 
@@ -55,7 +55,7 @@ corpo : declaracoes_locais comandos ;
 
 comandos : cmd comandos | /* epsilon */ ;
 
-    cmd	: 'leia' '(' identificador mais_ident ')'
+    cmd	: 'leia' '(' idLeia=identificador maisIdLeia=mais_ident ')'
 			| 'escreva' '(' expressao mais_expressao ')'
 			| 'se' expressao 'entao' comandos senao_opcional 'fim_se'
 		  | 'caso' exp_aritmetica 'seja' selecao senao_opcional 'fim_caso'
