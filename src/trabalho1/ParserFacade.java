@@ -53,7 +53,7 @@ public class ParserFacade {
             msg = msg.replaceAll("'", "");
             if(msg.charAt(0) == '"')
             {
-                msg = new String("");
+                msg = "";
                 msg += '"'  + " - simbolo nao identificado";
             }else if(msg.charAt(0) == '{')
             {
@@ -102,7 +102,27 @@ public class ParserFacade {
         parser.removeErrorListeners();
         parser.addErrorListener(sintaxListener);
         
+        AnalisadorSemantico analisadorSemantico = new AnalisadorSemantico();
+        
         LAParser.ProgramaContext context = parser.programa();
+        
+        if(Example.modo == 2)
+        {
+            System.out.println("Iniciando analise semantica");
+            analisadorSemantico.visit(context);
+        }
+        
+        GeradorCodigo geradorCodigo = new GeradorCodigo();
+        
+        if(Example.modo == 3)
+        {
+            System.out.println("Iniciando geração de codigo");
+            geradorCodigo.visit(context);
+        }
+        
+        
+        System.err.flush();
+        
         writer.close();
         return context;
     }
