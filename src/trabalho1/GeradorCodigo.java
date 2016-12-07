@@ -444,6 +444,10 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
 
     @Override
     public Void visitChamada_partes(LAParser.Chamada_partesContext ctx) {
+        if(ctx.dimensao()!= null && ctx.dimensao().getText().isEmpty() == false){
+                visitDimensao(ctx.dimensao());
+        }
+        
         System.out.print("(");
         
         System.out.print(")");
