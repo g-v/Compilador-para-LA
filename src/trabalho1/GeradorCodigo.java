@@ -40,12 +40,12 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
     @Override
     public Void visitPrograma(LAParser.ProgramaContext ctx) {
         visitDeclaracoes(ctx.declaracoes());
-        System.out.print("typedef int bool;\n");
+        System.out.print("typedef int bool\n");
         System.out.print("#define true 1\n");
         System.out.print("#define false 0\n\n\n");
         System.out.print("int main() {\n");
         visitCorpo(ctx.corpo());
-        System.out.print("return 0;\n}\n");
+        System.out.print("  return 0;\n}\n");
         return null;
     }
 
@@ -82,6 +82,8 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
 
     @Override
     public Void visitCmd(LAParser.CmdContext ctx) {
+        
+        // LEIA
         if(ctx.identificador()!= null && ctx.identificador().getText().isEmpty() == false){
         
             String tipo = variaveisTipos.get(ctx.identificador().IDENT().getText());
@@ -92,26 +94,52 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
             visitIdentificador(ctx.identificador());
             System.out.print(");\n");
             
-            if(ctx.mais_ident()!= null && ctx.mais_ident().getText().isEmpty() == false){
-                  
-
+            LAParser.Mais_identContext pointer = ctx.mais_ident();
+            
+            while(pointer != null && pointer.getText().isEmpty() == false){
+                tipo = variaveisTipos.get(pointer.identificador().IDENT().getText());
+                System.out.print("scanf(\"" + variaveisScanf.get(tipo) + "\", ");
+                if(!tipo.equals("char*")) {
+                    System.out.print("&");
+                }
+                visitIdentificador(pointer.identificador());
+                System.out.print(");\n");
+                if(pointer.mais_ident() != null)
+                    pointer = pointer.mais_ident();
+            }
+        }
+        
+        // LEIA
+        if(ctx.identificador()!= null && ctx.identificador().getText().isEmpty() == false){
+        
+            String tipo = variaveisTipos.get(ctx.identificador().IDENT().getText());
+            System.out.print("scanf(\"" + variaveisScanf.get(tipo) + "\", ");
+            if(!tipo.equals("char*")) {
+                System.out.print("&");
+            }
+            visitIdentificador(ctx.identificador());
+            System.out.print(");\n");
+            
+            LAParser.Mais_identContext pointer = ctx.mais_ident();
+            
+            while(pointer != null && pointer.getText().isEmpty() == false){
+                tipo = variaveisTipos.get(pointer.identificador().IDENT().getText());
+                System.out.print("scanf(\"" + variaveisScanf.get(tipo) + "\", ");
+                if(!tipo.equals("char*")) {
+                    System.out.print("&");
+                }
+                visitIdentificador(pointer.identificador());
+                System.out.print(");\n");
+                if(pointer.mais_ident() != null)
+                    pointer = pointer.mais_ident();
             }
         }
             
         return null;
     }
+    
+    
 
-    @Override
-    public Void visitMais_ident(LAParser.Mais_identContext ctx) {
-        String tipo = variaveisTipos.get(ctx.identificador().IDENT().getText());
-        System.out.print("scanf(\"" + variaveisScanf.get(tipo) + "\", ");
-        if(!tipo.equals("char*")) {
-            System.out.print("&");
-        }
-        visitIdentificador(ctx.identificador());
-        System.out.print(")");
-        return null;
-    }
     
     
 
@@ -218,7 +246,7 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
         System.out.print(", ");
         String ident = ctx.IDENT().getText();
         System.out.print(ident);
-        variaveisTipos.put(dictionaryTipos.get(tipoAtual), ident);
+        variaveisTipos.put(ident, dictionaryTipos.get(tipoAtual));
         if (ctx.dimensao() != null && ctx.dimensao().getText().isEmpty() == false) {
             visitDimensao(ctx.dimensao());
         }

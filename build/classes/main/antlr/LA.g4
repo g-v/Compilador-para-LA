@@ -55,7 +55,7 @@ corpo : declaracoes_locais comandos ;
 
 comandos : cmd comandos | /* epsilon */ ;
 
-    cmd	: 'leia' '(' identificador leiaMaisIdent=mais_ident ')'
+    cmd	: 'leia' '(' identificador mais_ident ')'
 			| 'escreva' '(' expressao mais_expressao ')'
 			| 'se' expressao 'entao' comandos senao_opcional 'fim_se'
 		  | 'caso' exp_aritmetica 'seja' selecao senao_opcional 'fim_caso'
