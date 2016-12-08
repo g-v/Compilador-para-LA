@@ -1,4 +1,4 @@
-// Generated from /home/akari/Documentos/T1/compilador2/Compilador-para-LA/src/main/antlr/LA.g4 by ANTLR 4.2.2
+// Generated from /home/akari/natasha/Compilador-para-LA/src/main/antlr/LA.g4 by ANTLR 4.2.2
 package trabalho1.parser;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -1683,6 +1683,7 @@ public class LAParser extends Parser {
 		public Mais_expressaoContext maisIdEscreva;
 		public ExpressaoContext idIf;
 		public ComandosContext idComandos;
+		public Exp_aritmeticaContext idCaso;
 		public Token cmdAtribPonteiroIdent;
 		public Token cmdAtribuicaoIdent;
 		public Token cmdReturn;
@@ -1783,7 +1784,7 @@ public class LAParser extends Parser {
 				enterOuterAlt(_localctx, 4);
 				{
 				setState(296); match(30);
-				setState(297); exp_aritmetica();
+				setState(297); ((CmdContext)_localctx).idCaso = exp_aritmetica();
 				setState(298); match(12);
 				setState(299); selecao();
 				setState(300); senao_opcional();
