@@ -187,6 +187,17 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
             
             System.out.print(";\n");
         }
+        
+        // ATRIBUICAO
+        
+        if(ctx.cmdAtribuicaoIdent != null && ctx.cmdAtribuicaoIdent.getText().isEmpty() == false){
+            System.out.print(ctx.IDENT().getText());
+            if(ctx.chamada_atribuicao()!= null && ctx.chamada_atribuicao().getText().isEmpty() == false){
+                visitChamada_atribuicao(ctx.chamada_atribuicao());
+            }
+            
+            System.out.print(";\n");
+        }
             
         return null;
     }
