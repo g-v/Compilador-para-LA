@@ -59,9 +59,9 @@ comandos : cmd comandos | /* epsilon */ ;
 			| 'escreva' '(' idEscreva=expressao maisIdEscreva=mais_expressao ')'
 			| 'se' idIf=expressao 'entao' idComandos=comandos senao_opcional 'fim_se'
 		  | 'caso' idCaso=exp_aritmetica 'seja' selecao idDefault=senao_opcional 'fim_caso'
-			| 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' comandos 'fim_para'
-			| 'enquanto' expressao 'faca' comandos 'fim_enquanto'
-			| 'faca' comandos 'ate' expressao
+			| 'para' idFor=IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' comandos 'fim_para'
+			| 'enquanto' idWhile=expressao 'faca' comandos 'fim_enquanto'
+			| 'faca' idDoWhile=comandos 'ate' expressao
 			| '^' cmdAtribPonteiroIdent=IDENT outros_ident dimensao '<-' expressao
 			| cmdAtribuicaoIdent=IDENT chamada_atribuicao
 			| cmdReturn='retorne' expressao ;

@@ -29,6 +29,12 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
         
 
     public GeradorCodigo() {
+        System.out.print("#include <stdio.h>\n");
+        System.out.print("#include <stdlib.h>\n");
+        System.out.print("typedef int bool\n");
+        System.out.print("#define true 1\n");
+        System.out.print("#define false 0\n\n\n");
+        
         dictionaryTipos.put("real", "float");
         dictionaryTipos.put("inteiro", "int");
         dictionaryTipos.put("logico", "bool");
@@ -45,11 +51,6 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
     @Override
     public Void visitPrograma(LAParser.ProgramaContext ctx) {
         visitDeclaracoes(ctx.declaracoes());
-        System.out.print("#include <stdio.h>n");
-        System.out.print("#include <stdlib.h>\n");
-        System.out.print("typedef int bool\n");
-        System.out.print("#define true 1\n");
-        System.out.print("#define false 0\n\n\n");
         System.out.print("int main() {\n");
         visitCorpo(ctx.corpo());
         System.out.print("  return 0;\n}\n");
@@ -159,7 +160,7 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
             }
              
              
-            System.out.print("printf(\"\\n\");\n");
+            //System.out.print("printf(\"\\n\");\n");
             imprimindo = false;
 
         }
@@ -206,9 +207,15 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
                 visitComandos(ctx.idDefault.comandos());                        
             }
            
-            System.out.print(";\n");
+            
             System.out.print("}\n");
         }
+        
+        
+        
+      //FOR
+      
+      
             
         return null;
     }
@@ -416,35 +423,40 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
             visitVariavel(ctx.variavel());
         }
         if(ctx.dclLocalConst != null && ctx.dclLocalConst.getText().isEmpty() == false){
-            System.out.print("const ");
+            System.out.print("#define ");
+            System.out.print(ctx.IDENT().getText() + " ");
+            if(ctx.valor_constante().idVdd != null){
+               System.out.print("true");
+            }
+            else if(ctx.valor_constante().idFake != null){
+               System.out.print("false");
+            }
+            else
+                System.out.print(ctx.valor_constante().getText());
+            System.out.print("\n");
             
-            tipoAtual = ctx.tipo_basico().getText();
-            String ident = ctx.IDENT().getText();
-            String value = ctx.IDENT().getText();
-            System.out.print(dictionaryTipos.get(tipoAtual) + " " + ident + ";\n +");
-            variaveisTipos.put(ident, dictionaryTipos.get(tipoAtual));
+            
+// NAO USAR
+//            tipoAtual = ctx.tipo_basico().getText();
+//            String ident = ctx.IDENT().getText();
+//            String value = ctx.IDENT().getText();
+//            System.out.print(dictionaryTipos.get(tipoAtual) + " " + ident + " = ");
+//            if(ctx.valor_constante().idVdd != null){
+//               System.out.print("true");
+//            }
+//            else if(ctx.valor_constante().idFake != null){
+//               System.out.print("false");
+//            }
+//            else
+//                System.out.print(ctx.valor_constante().getText());
+            
+//            System.out.print(";\n");
+//            variaveisTipos.put(ident, dictionaryTipos.get(tipoAtual));
         }
         if(ctx.dclLocalTipo != null && ctx.dclLocalTipo.getText().isEmpty() == false){
         }
         
         return null;
-    }
-
-    @Override
-    public Void visitValor_constante(LAParser.Valor_constanteContext ctx) {
-        
-        if(ctx.CADEIA().getText() != null){
-            
-        }
-        else if(ctx.CADEIA().getText() != null){
-                   
-        }
-        else if(ctx.CADEIA().getText() != null){
-            
-        }
-        else if(ctx.CADEIA().getText() != null){
-            
-        }
     }
 
     

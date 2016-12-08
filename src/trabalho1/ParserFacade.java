@@ -116,7 +116,6 @@ public class ParserFacade {
         
         if(Example.modo == 3)
         {
-            System.out.println("Iniciando geração de codigo");
             geradorCodigo.visit(context);
         }
         
