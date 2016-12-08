@@ -1684,6 +1684,7 @@ public class LAParser extends Parser {
 		public ExpressaoContext idIf;
 		public ComandosContext idComandos;
 		public Exp_aritmeticaContext idCaso;
+		public Senao_opcionalContext idDefault;
 		public Token cmdAtribPonteiroIdent;
 		public Token cmdAtribuicaoIdent;
 		public Token cmdReturn;
@@ -1787,7 +1788,7 @@ public class LAParser extends Parser {
 				setState(297); ((CmdContext)_localctx).idCaso = exp_aritmetica();
 				setState(298); match(12);
 				setState(299); selecao();
-				setState(300); senao_opcional();
+				setState(300); ((CmdContext)_localctx).idDefault = senao_opcional();
 				setState(301); match(15);
 				}
 				break;
