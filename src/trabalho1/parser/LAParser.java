@@ -1712,6 +1712,9 @@ public class LAParser extends Parser {
 		public ComandosContext idComandos;
 		public Exp_aritmeticaContext idCaso;
 		public Senao_opcionalContext idDefault;
+		public Token idFor;
+		public ExpressaoContext idWhile;
+		public ComandosContext idDoWhile;
 		public Token cmdAtribPonteiroIdent;
 		public Token cmdAtribuicaoIdent;
 		public Token cmdReturn;
@@ -1823,7 +1826,7 @@ public class LAParser extends Parser {
 				enterOuterAlt(_localctx, 5);
 				{
 				setState(308); match(14);
-				setState(309); match(IDENT);
+				setState(309); ((CmdContext)_localctx).idFor = match(IDENT);
 				setState(310); match(20);
 				setState(311); exp_aritmetica();
 				setState(312); match(38);
@@ -1837,7 +1840,7 @@ public class LAParser extends Parser {
 				enterOuterAlt(_localctx, 6);
 				{
 				setState(318); match(32);
-				setState(319); expressao();
+				setState(319); ((CmdContext)_localctx).idWhile = expressao();
 				setState(320); match(6);
 				setState(321); comandos();
 				setState(322); match(46);
@@ -1847,7 +1850,7 @@ public class LAParser extends Parser {
 				enterOuterAlt(_localctx, 7);
 				{
 				setState(324); match(6);
-				setState(325); comandos();
+				setState(325); ((CmdContext)_localctx).idDoWhile = comandos();
 				setState(326); match(38);
 				setState(327); expressao();
 				}
