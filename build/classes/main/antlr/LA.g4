@@ -34,7 +34,7 @@ tipo_basico_ident : tipo_basico | IDENT ;
 
 tipo_estendido : ponteiros_opcionais tipo_basico_ident ;
 
-valor_constante	: CADEIA | NUM_INT | NUM_REAL | 'verdadeiro' | 'falso' ;
+valor_constante	: CADEIA | NUM_INT | NUM_REAL | idVdd='verdadeiro' | idFake='falso' ;
 
 registro : 'registro' variavel mais_variaveis 'fim_registro' ;
 

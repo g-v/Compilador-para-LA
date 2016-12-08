@@ -202,7 +202,7 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
             }
             
             if(ctx.idDefault != null && ctx.idDefault.getText().isEmpty() == false){
-                System.out.print("default:");
+                System.out.print("default:\n");
                 visitComandos(ctx.idDefault.comandos());                        
             }
            
@@ -217,11 +217,11 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
     public Void visitSelecao(LAParser.SelecaoContext ctx) {
         visitConstantes(ctx.constantes());
         visitComandos(ctx.comandos()); 
+        System.out.print("break;\n");
         if(ctx.mais_selecao()!= null && ctx.mais_selecao().getText().isEmpty() == false){
             visitSelecao(ctx.mais_selecao().selecao());
         }
-                    
-            System.out.print("sdfsdfsf");
+                  
         return null;
     }
 
@@ -231,7 +231,7 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
         
         if(ctx.numero_intervalo().intervalo_opcional().NUM_INT() == null){
             int value = Integer.parseInt(ctx.numero_intervalo().NUM_INT().toString());
-            System.out.print("case " + value + ":\n");
+            System.out.print("case " + value + ":\n ");
         }
         else{
             int firstValue = Integer.parseInt(ctx.numero_intervalo().NUM_INT().toString());
@@ -409,17 +409,46 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
         }
         return null;
     }
-
-    @Override
+    
+     @Override
     public Void visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {
         if (ctx.variavel() != null && ctx.variavel().getText().isEmpty() == false) {
             visitVariavel(ctx.variavel());
         }
-        
-        
+        if(ctx.dclLocalConst != null && ctx.dclLocalConst.getText().isEmpty() == false){
+            System.out.print("const ");
+            
+            tipoAtual = ctx.tipo_basico().getText();
+            String ident = ctx.IDENT().getText();
+            String value = ctx.IDENT().getText();
+            System.out.print(dictionaryTipos.get(tipoAtual) + " " + ident + ";\n +");
+            variaveisTipos.put(ident, dictionaryTipos.get(tipoAtual));
+        }
+        if(ctx.dclLocalTipo != null && ctx.dclLocalTipo.getText().isEmpty() == false){
+        }
         
         return null;
     }
+
+    @Override
+    public Void visitValor_constante(LAParser.Valor_constanteContext ctx) {
+        
+        if(ctx.CADEIA().getText() != null){
+            
+        }
+        else if(ctx.CADEIA().getText() != null){
+                   
+        }
+        else if(ctx.CADEIA().getText() != null){
+            
+        }
+        else if(ctx.CADEIA().getText() != null){
+            
+        }
+    }
+
+    
+   
 
     @Override
     public Void visitDeclaracoes_locais(LAParser.Declaracoes_locaisContext ctx) {
@@ -429,6 +458,7 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
         }
         return null;                
     }
+    
     
     
 
