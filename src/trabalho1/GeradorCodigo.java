@@ -45,6 +45,8 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
     @Override
     public Void visitPrograma(LAParser.ProgramaContext ctx) {
         visitDeclaracoes(ctx.declaracoes());
+        System.out.print("#include <stdio.h>n");
+        System.out.print("#include <stdlib.h>\n");
         System.out.print("typedef int bool\n");
         System.out.print("#define true 1\n");
         System.out.print("#define false 0\n\n\n");
@@ -157,7 +159,7 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
             }
              
              
-            System.out.print("printf(\"\\n\");");
+            System.out.print("printf(\"\\n\");\n");
             imprimindo = false;
 
         }
@@ -190,17 +192,57 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
         
         // ATRIBUICAO
         
-        if(ctx.cmdAtribuicaoIdent != null && ctx.cmdAtribuicaoIdent.getText().isEmpty() == false){
-            System.out.print(ctx.IDENT().getText());
-            if(ctx.chamada_atribuicao()!= null && ctx.chamada_atribuicao().getText().isEmpty() == false){
-                visitChamada_atribuicao(ctx.chamada_atribuicao());
+        if(ctx.idCaso != null && ctx.idCaso.getText().isEmpty() == false){
+            System.out.print("swtich(");
+            visitExp_aritmetica(ctx.idCaso);
+            System.out.print("){\n");
+            
+            if(ctx.selecao()!= null && ctx.selecao().getText().isEmpty() == false){
+                visitSelecao(ctx.selecao());
             }
+            
+         
+
+            
             
             System.out.print(";\n");
         }
             
         return null;
     }
+
+    @Override
+    public Void visitSelecao(LAParser.SelecaoContext ctx) {
+        visitConstantes(ctx.constantes());
+        visitComandos(ctx.comandos()); 
+        if(ctx.mais_selecao()!= null && ctx.mais_selecao().getText().isEmpty() == false){
+            visitSelecao(ctx.mais_selecao().selecao());
+        }
+                    
+            System.out.print("sdfsdfsf");
+        return null;
+    }
+
+
+    @Override
+    public Void visitConstantes(LAParser.ConstantesContext ctx) {
+        
+        if(ctx.numero_intervalo().intervalo_opcional().NUM_INT() == null){
+            int value = Integer.parseInt(ctx.numero_intervalo().NUM_INT().toString());
+            System.out.print("case " + value + ":\n");
+        }
+        else{
+            int firstValue = Integer.parseInt(ctx.numero_intervalo().NUM_INT().toString());
+            int lastValue = Integer.parseInt(ctx.numero_intervalo().intervalo_opcional().NUM_INT().toString());
+            
+            for(int i = firstValue; i <= lastValue; i++){
+                System.out.print("case " + i + ":\n");               
+            }
+        }
+        return null;
+    }
+  
+    
 
     @Override
     public Void visitExpressao(LAParser.ExpressaoContext ctx) {
