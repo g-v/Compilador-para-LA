@@ -116,7 +116,7 @@ exp_relacional : exp_aritmetica op_opcional ;
 
 op_opcional : op_relacional exp_aritmetica /* TIPO LOGICO */ | /* epsilon */ ;
 
-op_relacional : '='  | '<>' | '>=' | '<=' | '>' | '<' ;
+op_relacional :     '='  | '<>' | '>=' | '<=' | '>' | '<' ;
 
 expressao : termo_logico outros_termos_logicos ;
 

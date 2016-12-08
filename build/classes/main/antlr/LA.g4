@@ -110,13 +110,13 @@ parcela_nao_unario : '&' IDENT outros_ident dimensao /* TIPO STRUCT */ | pnuCade
 
 outras_parcelas : '%' parcela outras_parcelas /* TIPO NUMERICO */ | /* epsilon */ ;
 
-chamada_partes : '(' expressao mais_expressao ')' | outros_ident dimensao | /* epsilon */ ;
+chamada_partes : idAbre='(' expressao mais_expressao idFecha=')' | outros_ident dimensao | /* epsilon */ ;
 
 exp_relacional : exp_aritmetica op_opcional ;
 
 op_opcional : op_relacional exp_aritmetica /* TIPO LOGICO */ | /* epsilon */ ;
 
-op_relacional : '='  | '<>' | '>=' | '<=' | '>' | '<' ;
+op_relacional :     '='  | '<>' | '>=' | '<=' | '>' | '<' ;
 
 expressao : termo_logico outros_termos_logicos ;
 
