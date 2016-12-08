@@ -190,10 +190,10 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
             System.out.print(";\n");
         }
         
-        // ATRIBUICAO
+        // SWITCH CASE
         
         if(ctx.idCaso != null && ctx.idCaso.getText().isEmpty() == false){
-            System.out.print("swtich(");
+            System.out.print("switch(");
             visitExp_aritmetica(ctx.idCaso);
             System.out.print("){\n");
             
@@ -201,11 +201,13 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
                 visitSelecao(ctx.selecao());
             }
             
-         
-
-            
-            
+            if(ctx.idDefault != null && ctx.idDefault.getText().isEmpty() == false){
+                System.out.print("default:");
+                visitComandos(ctx.idDefault.comandos());                        
+            }
+           
             System.out.print(";\n");
+            System.out.print("}\n");
         }
             
         return null;
