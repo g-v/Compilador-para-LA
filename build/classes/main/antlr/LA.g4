@@ -58,7 +58,7 @@ comandos : cmd comandos | /* epsilon */ ;
     cmd	: 'leia' '(' idLeia=identificador maisIdLeia=mais_ident ')'
 			| 'escreva' '(' idEscreva=expressao maisIdEscreva=mais_expressao ')'
 			| 'se' idIf=expressao 'entao' idComandos=comandos senao_opcional 'fim_se'
-		  | 'caso' exp_aritmetica 'seja' selecao senao_opcional 'fim_caso'
+		  | 'caso' idCaso=exp_aritmetica 'seja' selecao senao_opcional 'fim_caso'
 			| 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' comandos 'fim_para'
 			| 'enquanto' expressao 'faca' comandos 'fim_enquanto'
 			| 'faca' comandos 'ate' expressao
