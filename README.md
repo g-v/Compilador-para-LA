@@ -8,9 +8,11 @@ Lucas Macedo - RA: 489409
 
 ## Instruções para Compilação  
 
-1. Instalalar `gradle`  
----------------------------------------------
-### UNIX  
+1 - Instalar `gradle`  
+
+----------------------------
+
+### >>>> UNIX  
 Se o Gradle não estiver disponível no Gerenciador de Pacotes do seu SO, uma maneira de instalar é:  
 
 ### SDKMAN  
@@ -20,16 +22,18 @@ Baixar SDKMAN:
 Abra um novo terminal e instale o Gradle    
 `$ sdk install gradle 3.2.1`  
 
-### WINDOWS
+### >>>> WINDOWS
 Baixar o instalador em: https://gradle.org/gradle-download/  
----------------------------------------------
-2. Após instalar o gradle, abra o terminal e vá para a pasta raiz do projeto. Execute o comando abaixo para compilar a gramática:  
+
+----------------------------
+
+2 - Após instalar o gradle, abra o terminal e vá para a pasta raiz do projeto. Execute o comando abaixo para compilar a gramática:  
 `$ gradle antlr4`  
 
-3. Em seguida, entre na pasta `src`:  
+3 - Em seguida, entre na pasta `src`:  
 `$ cd src`
 
-4. Execute:
+4 - Execute:
 TODO
 
 ## Como Utilizar
