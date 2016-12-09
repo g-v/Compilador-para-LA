@@ -5,6 +5,8 @@
         <group>
             <file>file:/home/guerra/Desktop/petgithub/Compilador-para-LA/src/trabalho1/parser/LABaseVisitor.java</file>
             <file>file:/home/guerra/Desktop/petgithub/Compilador-para-LA/src/trabalho1/Example.java</file>
+            <file>file:/home/guerra/Desktop/petgithub/Compilador-para-LA/src/trabalho1/ParserFacade.java</file>
+            <file>file:/home/guerra/Desktop/petgithub/Compilador-para-LA/src/trabalho1/anotacoes.txt</file>
             <file>file:/home/guerra/Desktop/petgithub/Compilador-para-LA/src/trabalho1/GeradorCodigo.java</file>
             <file>file:/home/guerra/Desktop/petgithub/Compilador-para-LA/src/main/antlr/LA.g4</file>
             <file>file:/home/guerra/Desktop/petgithub/Compilador-para-LA/src/trabalho1/AnalisadorSemantico.java</file>
