@@ -4,7 +4,7 @@ Autores:
 Bruno Greco - RA: 489271 - @realm087  
 Bruno Guerra - RA: 489360 - @b-guerra  
 Guilherme Vazquez - RA: 489255 - @g-v  
-Lucas Macedo - RA:  
+Lucas Macedo - RA: 489409  
 
 ## Como Utilizar
 
