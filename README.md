@@ -11,12 +11,12 @@ Lucas Macedo - RA:
 TODO  
 
 Linux/Mac  
-
+```
 $ cd dist  
 $ 
-
+```
 ## Estrutura do Diretório
-
+```
 /  
    -> dist/  
       -> T1.jar  
@@ -34,7 +34,7 @@ $
       -> 2.declaracao_leitura_impressao_real.alg  
       -> saida.txt  
       -> saidaGeradorDeCodigo.txt  
-   
+```   
 
 
 
