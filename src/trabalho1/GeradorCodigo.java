@@ -215,6 +215,13 @@ public class GeradorCodigo extends LABaseVisitor<Void>{
         
       //FOR
       
+      if(ctx.idFor != null && ctx.idFor.getText().isEmpty() == false){
+          System.out.print("for(");
+          System.out.print(ctx.idFor.getText());
+          System.out.print(" = ");
+          visitExp_aritmetica(ctx.exp)
+                  
+      }
       
             
         return null;
