@@ -1713,6 +1713,8 @@ public class LAParser extends Parser {
 		public Exp_aritmeticaContext idCaso;
 		public Senao_opcionalContext idDefault;
 		public Token idFor;
+		public Exp_aritmeticaContext idExp1;
+		public Exp_aritmeticaContext idExp2;
 		public ExpressaoContext idWhile;
 		public ComandosContext idDoWhile;
 		public Token cmdAtribPonteiroIdent;
@@ -1828,9 +1830,9 @@ public class LAParser extends Parser {
 				setState(308); match(14);
 				setState(309); ((CmdContext)_localctx).idFor = match(IDENT);
 				setState(310); match(20);
-				setState(311); exp_aritmetica();
+				setState(311); ((CmdContext)_localctx).idExp1 = exp_aritmetica();
 				setState(312); match(38);
-				setState(313); exp_aritmetica();
+				setState(313); ((CmdContext)_localctx).idExp2 = exp_aritmetica();
 				setState(314); match(6);
 				setState(315); comandos();
 				setState(316); match(34);
