@@ -68,12 +68,7 @@ c:\caminho_para\dist\T1.jar" gcc c:\caminho_para\temp c:\caminho_para\casosDeTes
       -> trabalho1/  
          -> AnalisadorSemantico.java  
          -> GeradorCodigo.java  
-
-   -> examples/  
-      -> 1.declaracao_leitura_impressao_inteiro.alg  
-      -> 2.declaracao_leitura_impressao_real.alg  
-      -> saida.txt  
-      -> saidaGeradorDeCodigo.txt  
+         -> *.java
 ```   
 
 
