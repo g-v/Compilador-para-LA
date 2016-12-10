@@ -10,8 +10,10 @@ Lucas Macedo - RA: 489409
 ## Instruções para Utilização  
 UNIX  
 `$ java -jar CorretorTrabalho1/CorretorTrabalho1.jar "java -jar dist/T1.jar" gcc temp casosDeTesteT1 "489255, 489271, 4892360, 489409" tudo`  
+ou  
+`$ sh corretor.sh`  
 
-Windows  
+Windows  
 `> java -jar c:\caminho_para\CorretorTrabalho1\CorretorTrabalho1.jar "java jar
 c:\caminho_para\dist\T1.jar" gcc c:\caminho_para\temp c:\caminho_para\casosDeTesteT1 "489255, 489271, 4892360, 489409" tudo`  
 
@@ -46,6 +48,8 @@ Baixar o instalador em: https://gradle.org/gradle-download/
 4 - Execute:  
 UNIX:  
 `$ java -jar CorretorTrabalho1/CorretorTrabalho1.jar "java -jar dist/T1.jar" gcc temp casosDeTesteT1 "489255, 489271, 4892360, 489409" tudo`  
+ou  
+`$ sh corretor.sh`  
 
 Windows  
 `> java -jar c:\caminho_para\CorretorTrabalho1\CorretorTrabalho1.jar "java jar
