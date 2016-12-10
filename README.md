@@ -13,8 +13,7 @@ UNIX
 
 Windows  
 `> java -jar c:\caminho_para\CorretorTrabalho1\CorretorTrabalho1.jar "java jar
-c:\caminho_para\dist\T1.jar" gcc c:\caminho_para\temp c:\caminho_para\casosDeTesteT1 "176168,
-155551, 187123" tudo`  
+c:\caminho_para\dist\T1.jar" gcc c:\caminho_para\temp c:\caminho_para\casosDeTesteT1 "489255, 489271, 4892360, 489409" tudo`  
 
 Ou se quiser construir o projeto localmente:  
 ## Instruções para Compilação  
