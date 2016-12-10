@@ -6,6 +6,17 @@ Bruno Guerra - RA: 489360 - @b-guerra
 Guilherme Vazquez - RA: 489255 - @g-v  
 Lucas Macedo - RA: 489409  
 
+
+## Instruções para Utilização  
+UNIX  
+`$ java -jar CorretorTrabalho1/CorretorTrabalho1.jar "java -jar dist/T1.jar" gcc temp casosDeTesteT1 "489255, 489271, 4892360, 489409" tudo`  
+
+Windows  
+`> java -jar c:\caminho_para\CorretorTrabalho1\CorretorTrabalho1.jar "java jar
+c:\caminho_para\dist\T1.jar" gcc c:\caminho_para\temp c:\caminho_para\casosDeTesteT1 "176168,
+155551, 187123" tudo`  
+
+Ou se quiser construir o projeto localmente:  
 ## Instruções para Compilação  
 
 1 - Instalar `gradle`  
@@ -31,20 +42,17 @@ Baixar o instalador em: https://gradle.org/gradle-download/
 `$ gradle antlr4`  
 
 3 - Em seguida, entre na pasta `src`:  
-`$ cd src`
+`$ cd src`  
 
-4 - Execute:
-TODO
+4 - Execute:  
+UNIX:  
+`$ java -jar CorretorTrabalho1/CorretorTrabalho1.jar "java -jar dist/T1.jar" gcc temp casosDeTesteT1 "489255, 489271, 4892360, 489409" tudo`  
 
-## Como Utilizar
+Windows  
+`> java -jar c:\caminho_para\CorretorTrabalho1\CorretorTrabalho1.jar "java jar
+c:\caminho_para\dist\T1.jar" gcc c:\caminho_para\temp c:\caminho_para\casosDeTesteT1 "176168,
+155551, 187123" tudo` 
 
-TODO  
-
-Linux  
-```
-$ cd dist  
-$ 
-```
 ## Estrutura do Diretório
 ```
 /  
