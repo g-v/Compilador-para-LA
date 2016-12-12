@@ -1,0 +1,17 @@
+-> casosDeTesteT1/
+	pasta que contém os casos de teste usados na correção do do programa CorretorTrabalho1.jar
+
+-> corretor.sh
+	shell script para rodar o programa CorretorTrabalho1.jar
+
+-> CorretorTrabalho1/
+	pasta que contém o programa de correção do trabalho, CorretorTrabalho1.jar
+
+-> dist/
+	pasta que contém o compilador T1.jar
+
+-> src/
+	-> main/antlr/LA.g4
+		gramática
+	-> trabalho1/
+		código-fonte, sendo AnalisadorSemantico.java e GeradorCodigo.java os arquivos principais do projeto.
