@@ -1,6 +1,7 @@
+procedimento proc_imprime(mensagem: literal)
+  escreva(mensagem,"\n")
+fim_procedimento
+
 algoritmo
-  declare
-    x: inteiro
-  leia(x)
-  escreva(x)
+  proc_imprime("teste")
 fim_algoritmo

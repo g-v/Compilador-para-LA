@@ -50,18 +50,14 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
 
         saida += "#include <stdio.h>\n";
         saida += "#include <stdlib.h>\n";
-        saida += "typedef int bool\n";
-        saida += "#define true 1\n";
-        saida += "#define false 0\n\n\n";
 
         dictionaryTipos.put("real", "float");
         dictionaryTipos.put("inteiro", "int");
-        dictionaryTipos.put("logico", "bool");
+        dictionaryTipos.put("logico", "int");
         dictionaryTipos.put("literal", "char");
 
         variaveisScanf.put("float", "%f");
         variaveisScanf.put("int", "%d");
-        variaveisScanf.put("bool", "%d");
         variaveisScanf.put("char", "%s");
     }
 
@@ -228,7 +224,10 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         // ATRIBUICAO
         if (ctx.cmdAtribuicaoIdent != null && ctx.cmdAtribuicaoIdent.getText().isEmpty() == false) {
 
-            imprimindo = true;
+            if(ctx.chamada_atribuicao().argumentos_opcional() != null && ctx.chamada_atribuicao().argumentos_opcional().getText().isEmpty() == false)
+                imprimindo = false;
+            else                        
+                imprimindo = true;
 
             imprimirExpressao = ctx.IDENT().getText();
 
@@ -392,7 +391,7 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             saida += "return ";
             visitExpressao(ctx.expressao());
             //System.out.println();
-            saida += "\n";
+            saida += ";\n";
         }
 
         return null;
