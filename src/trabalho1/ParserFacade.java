@@ -113,12 +113,13 @@ public class ParserFacade {
             analisadorSemantico.close();
         }
         
-        GeradorCodigo geradorCodigo = new GeradorCodigo();
+        GeradorCodigo geradorCodigo = new GeradorCodigo(saida);
         
         if(Example.modo == 3)
         {
             System.out.println("Iniciando geração de codigo");
             geradorCodigo.visit(context);
+            geradorCodigo.closeCerto();
         }
         
         

@@ -14,7 +14,7 @@ variavel : IDENT dimensao mais_var ':' tipo ;
 
 mais_var : ',' IDENT dimensao mais_var | /* epsilon */ ;
 
-identificador : ponteiros_opcionais IDENT dimensao outros_ident ;
+identificador returns [ String tipoIdent ] : ponteiros_opcionais IDENT dimensao outros_ident ;
 
 ponteiros_opcionais : '^' ponteiros_opcionais | /* epsilon */ ;
 
@@ -34,7 +34,7 @@ tipo_basico_ident : tipo_basico | IDENT ;
 
 tipo_estendido : ponteiros_opcionais tipo_basico_ident ;
 
-valor_constante	: CADEIA | NUM_INT | NUM_REAL | 'verdadeiro' | 'falso' ;
+-valor_constante	: CADEIA | NUM_INT | NUM_REAL | idVdd='verdadeiro' | idFake='falso' ;
 
 registro : 'registro' variavel mais_variaveis 'fim_registro' ;
 
@@ -55,13 +55,13 @@ corpo : declaracoes_locais comandos ;
 
 comandos : cmd comandos | /* epsilon */ ;
 
-    cmd	: cmdIsLeia='leia' '(' identificador leiaMaisIdent=mais_ident ')'
-			| cmdIsEscreva='escreva' '(' expressao mais_expressao ')'
-			| cmdIsSe='se' expressao 'entao' comandos senao_opcional 'fim_se'
-		  | cmdIsCase='caso' exp_aritmetica 'seja' selecao senao_opcional 'fim_caso'
-			| cmdIsPara='para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' comandos 'fim_para'
-			| cmdIsEnquanto='enquanto' expressao 'faca' comandos 'fim_enquanto'
-			| cmdIsFaca='faca' comandos 'ate' expressao
+    cmd	: cmdIsLeia='leia' '(' idLeia=identificador maisIdLeia=mais_ident ')'
+			| cmdIsEscreva='escreva' '(' idEscreva=expressao maisIdEscreva=mais_expressao ')'
+			| cmdIsSe='se' idIf=expressao 'entao' idComandos=comandos senao_opcional 'fim_se'
+		  | cmdIsCase='caso' idCaso=exp_aritmetica 'seja' selecao idDefault=senao_opcional 'fim_caso'
+			| cmdIsPara='para' idFor=IDENT '<-' idExp1=exp_aritmetica 'ate' idExp2=exp_aritmetica 'faca' comandos 'fim_para'
+			| cmdIsEnquanto='enquanto' idWhile=expressao 'faca' comandos 'fim_enquanto'
+			| cmdIsFaca='faca' idDoWhile=comandos 'ate' expressao
 			| '^' cmdAtribPonteiroIdent=IDENT outros_ident dimensao '<-' expressao
 			| cmdAtribuicaoIdent=IDENT chamada_atribuicao
 			| cmdReturn='retorne' expressao ;
@@ -110,7 +110,7 @@ parcela_nao_unario : '&' IDENT outros_ident dimensao /* TIPO STRUCT */ | pnuCade
 
 outras_parcelas : '%' parcela outras_parcelas /* TIPO NUMERICO */ | /* epsilon */ ;
 
-chamada_partes : cpIndicaFunc='(' expressao mais_expressao ')' | outros_ident dimensao | /* epsilon */ ;
+chamada_partes : idAbre=cpIndicaFunc='(' expressao mais_expressao idFecha=')' | outros_ident dimensao | /* epsilon */ ;
 
 exp_relacional : exp_aritmetica op_opcional ;
 
