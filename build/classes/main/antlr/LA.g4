@@ -55,13 +55,13 @@ corpo : declaracoes_locais comandos ;
 
 comandos : cmd comandos | /* epsilon */ ;
 
-    cmd	: 'leia' '(' idLeia=identificador maisIdLeia=mais_ident ')'
-			| 'escreva' '(' idEscreva=expressao maisIdEscreva=mais_expressao ')'
-			| 'se' idIf=expressao 'entao' idComandos=comandos senao_opcional 'fim_se'
-		  | 'caso' idCaso=exp_aritmetica 'seja' selecao idDefault=senao_opcional 'fim_caso'
-			| 'para' idFor=IDENT '<-' idExp1=exp_aritmetica 'ate' idExp2=exp_aritmetica 'faca' comandos 'fim_para'
-			| 'enquanto' idWhile=expressao 'faca' comandos 'fim_enquanto'
-			| 'faca' idDoWhile=comandos 'ate' expressao
+    cmd	: cmdIsLeia='leia' '(' idLeia=identificador maisIdLeia=mais_ident ')'
+			| cmdIsEscreva='escreva' '(' idEscreva=expressao maisIdEscreva=mais_expressao ')'
+			| cmdIsSe='se' idIf=expressao 'entao' idComandos=comandos senao_opcional 'fim_se'
+		  | cmdIsCase='caso' idCaso=exp_aritmetica 'seja' selecao idDefault=senao_opcional 'fim_caso'
+			| cmdIsPara='para' idFor=IDENT '<-' idExp1=exp_aritmetica 'ate' idExp2=exp_aritmetica 'faca' comandos 'fim_para'
+			| cmdIsEnquanto='enquanto' idWhile=expressao 'faca' comandos 'fim_enquanto'
+			| cmdIsFaca='faca' idDoWhile=comandos 'ate' expressao
 			| '^' cmdAtribPonteiroIdent=IDENT outros_ident dimensao '<-' expressao
 			| cmdAtribuicaoIdent=IDENT chamada_atribuicao
 			| cmdReturn='retorne' expressao ;
@@ -110,13 +110,13 @@ parcela_nao_unario : '&' IDENT outros_ident dimensao /* TIPO STRUCT */ | pnuCade
 
 outras_parcelas : '%' parcela outras_parcelas /* TIPO NUMERICO */ | /* epsilon */ ;
 
-chamada_partes : idAbre='(' expressao mais_expressao idFecha=')' | outros_ident dimensao | /* epsilon */ ;
+chamada_partes : idAbre='(' cpIndicaFunc=expressao mais_expressao idFecha=')' | outros_ident dimensao | /* epsilon */ ;
 
 exp_relacional : exp_aritmetica op_opcional ;
 
 op_opcional : op_relacional exp_aritmetica /* TIPO LOGICO */ | /* epsilon */ ;
 
-op_relacional :     '='  | '<>' | '>=' | '<=' | '>' | '<' ;
+op_relacional : '='  | '<>' | '>=' | '<=' | '>' | '<' ;
 
 expressao : termo_logico outros_termos_logicos ;
 

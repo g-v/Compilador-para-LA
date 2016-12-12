@@ -1,4 +1,4 @@
-// Generated from /home/akari/natasha/Compilador-para-LA/src/main/antlr/LA.g4 by ANTLR 4.2.2
+// Generated from /home/akari/gitMerge/greco/Compilador-para-LA/src/main/antlr/LA.g4 by ANTLR 4.2.2
 package trabalho1.parser;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -1704,18 +1704,25 @@ public class LAParser extends Parser {
 	}
 
 	public static class CmdContext extends ParserRuleContext {
+		public Token cmdIsLeia;
 		public IdentificadorContext idLeia;
 		public Mais_identContext maisIdLeia;
+		public Token cmdIsEscreva;
 		public ExpressaoContext idEscreva;
 		public Mais_expressaoContext maisIdEscreva;
+		public Token cmdIsSe;
 		public ExpressaoContext idIf;
 		public ComandosContext idComandos;
+		public Token cmdIsCase;
 		public Exp_aritmeticaContext idCaso;
 		public Senao_opcionalContext idDefault;
+		public Token cmdIsPara;
 		public Token idFor;
 		public Exp_aritmeticaContext idExp1;
 		public Exp_aritmeticaContext idExp2;
+		public Token cmdIsEnquanto;
 		public ExpressaoContext idWhile;
+		public Token cmdIsFaca;
 		public ComandosContext idDoWhile;
 		public Token cmdAtribPonteiroIdent;
 		public Token cmdAtribuicaoIdent;
@@ -1785,7 +1792,7 @@ public class LAParser extends Parser {
 			case 58:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(282); match(58);
+				setState(282); ((CmdContext)_localctx).cmdIsLeia = match(58);
 				setState(283); match(13);
 				setState(284); ((CmdContext)_localctx).idLeia = identificador();
 				setState(285); ((CmdContext)_localctx).maisIdLeia = mais_ident();
@@ -1795,7 +1802,7 @@ public class LAParser extends Parser {
 			case 52:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(288); match(52);
+				setState(288); ((CmdContext)_localctx).cmdIsEscreva = match(52);
 				setState(289); match(13);
 				setState(290); ((CmdContext)_localctx).idEscreva = expressao();
 				setState(291); ((CmdContext)_localctx).maisIdEscreva = mais_expressao();
@@ -1805,7 +1812,7 @@ public class LAParser extends Parser {
 			case 45:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(294); match(45);
+				setState(294); ((CmdContext)_localctx).cmdIsSe = match(45);
 				setState(295); ((CmdContext)_localctx).idIf = expressao();
 				setState(296); match(16);
 				setState(297); ((CmdContext)_localctx).idComandos = comandos();
@@ -1816,7 +1823,7 @@ public class LAParser extends Parser {
 			case 30:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(301); match(30);
+				setState(301); ((CmdContext)_localctx).cmdIsCase = match(30);
 				setState(302); ((CmdContext)_localctx).idCaso = exp_aritmetica();
 				setState(303); match(12);
 				setState(304); selecao();
@@ -1827,7 +1834,7 @@ public class LAParser extends Parser {
 			case 14:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(308); match(14);
+				setState(308); ((CmdContext)_localctx).cmdIsPara = match(14);
 				setState(309); ((CmdContext)_localctx).idFor = match(IDENT);
 				setState(310); match(20);
 				setState(311); ((CmdContext)_localctx).idExp1 = exp_aritmetica();
@@ -1841,7 +1848,7 @@ public class LAParser extends Parser {
 			case 32:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(318); match(32);
+				setState(318); ((CmdContext)_localctx).cmdIsEnquanto = match(32);
 				setState(319); ((CmdContext)_localctx).idWhile = expressao();
 				setState(320); match(6);
 				setState(321); comandos();
@@ -1851,7 +1858,7 @@ public class LAParser extends Parser {
 			case 6:
 				enterOuterAlt(_localctx, 7);
 				{
-				setState(324); match(6);
+				setState(324); ((CmdContext)_localctx).cmdIsFaca = match(6);
 				setState(325); ((CmdContext)_localctx).idDoWhile = comandos();
 				setState(326); match(38);
 				setState(327); expressao();
@@ -3250,6 +3257,7 @@ public class LAParser extends Parser {
 
 	public static class Chamada_partesContext extends ParserRuleContext {
 		public Token idAbre;
+		public ExpressaoContext cpIndicaFunc;
 		public Token idFecha;
 		public ExpressaoContext expressao() {
 			return getRuleContext(ExpressaoContext.class,0);
@@ -3292,7 +3300,7 @@ public class LAParser extends Parser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(466); ((Chamada_partesContext)_localctx).idAbre = match(13);
-				setState(467); expressao();
+				setState(467); ((Chamada_partesContext)_localctx).cpIndicaFunc = expressao();
 				setState(468); mais_expressao();
 				setState(469); ((Chamada_partesContext)_localctx).idFecha = match(55);
 				}
