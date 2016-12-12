@@ -33,13 +33,14 @@ public class TabelaDeSimbolos_FUNC {
         else return tabelaDeSimbolos.get(nome);
     }
     
-    public boolean inserirVarEmFUNC(String nome, String nomeVar, EntradaTS_TIPO tipoVar, int dimensaoVar, int nPonteiros) {
+    public boolean inserirVarEmFUNC(String nome, String nomeVar, EntradaTS_TIPO tipoVar, int nPonteiros, String... dimensaoVar) {
         EntradaTS_FUNC etds = verificar(nome);
         if(etds.verificarVar(nomeVar) != null)
             return false;
         else
         {
-            etds.inserirVar(nomeVar, tipoVar, dimensaoVar, nPonteiros);
+            etds.inserirVar(nomeVar, tipoVar, nPonteiros, dimensaoVar);
+            tabelaDeSimbolos.put(nome, etds);
             return true;
         }
     }
@@ -57,11 +58,13 @@ public class TabelaDeSimbolos_FUNC {
     {
         EntradaTS_FUNC etds = verificar(nome);
         etds.nArgumentos++;
+        tabelaDeSimbolos.put(nome, etds);
     }
     
     void setNumeroArgumentosFunc(String nome, int n)
     {
         EntradaTS_FUNC etds = verificar(nome);
         etds.nArgumentos = n;
+        tabelaDeSimbolos.put(nome, etds);
     }
 }

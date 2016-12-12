@@ -14,17 +14,15 @@ public class TDSContext {
     
     TabelaDeSimbolos_FUNC tabelaFunc;
     TabelaDeSimbolos_TIPOS tabelaDeTipos;
-    TabelaDeSimbolos_IDENT tabelaIdent;
     
     int STRCTLevel;
     boolean FUNCMode;
     String nomeFUNC;
     TDSContext()
     {
-        structContext = new STRCTContext(new TabelaDeSimbolos_STRCT(), new TabelaDeSimbolos_VAR());
+        structContext = new STRCTContext();
         tabelaFunc = new TabelaDeSimbolos_FUNC();
         tabelaDeTipos = new TabelaDeSimbolos_TIPOS();
-        tabelaIdent = new TabelaDeSimbolos_IDENT();
         
         STRCTLevel = 0;
         FUNCMode = false;
@@ -71,34 +69,14 @@ public class TDSContext {
         FUNCMode = false;
     }
     
-    void insereIDENT(String nome)
-    {
-        tabelaIdent.inserir(nome);
-    }
-    
-    EntradaTabelaDeSimbolos verificaIDENT(String nome)
-    {
-        return tabelaIdent.verificar(nome);
-    }
-    
-    boolean confirmaIdent(String nome)
-    {
-        if(verificaIDENT(nome) == null)
-        {
-            insereIDENT(nome);
-            return true;
-        }else
-            return false;
-    }
-    
-    void insereVAR(String nome, EntradaTS_TIPO tipo, int dimensao, int nPonteiros)
+    void insereVAR(String nome, EntradaTS_TIPO tipo, int nPonteiros, String... dimensao)
     {
         if(FUNCMode == false)
         {
-            structContext.insereVariavel(nome, tipo, dimensao, nPonteiros);
+            structContext.insereVariavel(nome, tipo, nPonteiros, dimensao);
         }
         else
-            tabelaFunc.inserirVarEmFUNC(nome, nomeFUNC, tipo, dimensao, nPonteiros);
+            tabelaFunc.inserirVarEmFUNC(nomeFUNC, nome, tipo, nPonteiros, dimensao);
     }
     
     EntradaTS_VAR verificaVAR(String nome)
@@ -134,6 +112,16 @@ public class TDSContext {
     EntradaTS_FUNC verificaFUNC(String nome)
     {
         return tabelaFunc.verificar(nome);
+    }
+    
+    void criaNovoEscopo()
+    {
+        structContext.criaNovoEscopo();
+    }
+    
+    void abandonaEscopo()
+    {
+        structContext.abandonaEscopo();
     }
     
     EntradaTS_VAR recuperaArg(int i)
@@ -193,5 +181,10 @@ public class TDSContext {
         }
         
         return converte;
+    }
+    
+    boolean tiposIguais(String tipo1, String tipo2)
+    {
+        return tipo1.equals(tipo2);
     }
 }

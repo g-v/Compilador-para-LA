@@ -5,6 +5,9 @@
  */
 package trabalho1;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  *
  * @author Esquilo
@@ -13,9 +16,10 @@ public class EntradaTS_VAR extends EntradaTabelaDeSimbolos{
 
     public EntradaTS_VAR() {
         tipo = new EntradaTS_TIPO();
+        dimensao = new LinkedList<>();
     }
     
     EntradaTS_TIPO tipo;
-    int dimensao;
+    List<String> dimensao;
     int nPonteiros;
 }

@@ -32,8 +32,9 @@ public class EntradaTS_FUNC extends EntradaTabelaDeSimbolos{
         else return verificarVar(nomesArgumentos.get(i));
     }
     
-    public void inserirVar(String nome, EntradaTS_TIPO tipo, int dimensao, int nPonteiros) {
-        tabelaArgumentos.inserir(nome, tipo, dimensao, nPonteiros);
+    public void inserirVar(String nome, EntradaTS_TIPO tipo, int nPonteiros, String... dimensao) {
+        tabelaArgumentos.inserir(nome, tipo, nPonteiros, dimensao);
+        nomesArgumentos.put(nomesArgumentos.size(), nome);
     }
     
     public EntradaTS_VAR verificarVar(String nome) {

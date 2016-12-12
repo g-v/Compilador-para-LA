@@ -18,12 +18,12 @@ public class STRCTContext {
     int mode;
     TabelaDeSimbolos_STRCT tabelaDeEstruturas;
     Stack<TabelaDeSimbolos_STRCT> paiStack;
-    TabelaDeSimbolos_VAR tabelaVARBase;
+    Escopos<TabelaDeSimbolos_VAR> escoposVARBase;
     
-    STRCTContext(TabelaDeSimbolos_STRCT tabela, TabelaDeSimbolos_VAR tabelaBase)
+    STRCTContext()
     {
-        tabelaDeEstruturas = tabela;
-        tabelaVARBase = tabelaBase;
+        tabelaDeEstruturas = new TabelaDeSimbolos_STRCT();
+        escoposVARBase = new Escopos<>(new TabelaDeSimbolos_VAR());
         paiStack = new Stack<>();
         mode = 0;
     }
@@ -68,14 +68,14 @@ public class STRCTContext {
         
     }
     
-    void insereVariavel(String nome, EntradaTS_TIPO tipo, int dimensao, int nPonteiros)
+    void insereVariavel(String nome, EntradaTS_TIPO tipo, int nPonteiros, String... dimensao)
     {
         if(mode == 0)
         {
-            tabelaVARBase.inserir(nome, tipo, dimensao, nPonteiros);
+            escoposVARBase.pegarEscopoAtual().inserir(nome, tipo, nPonteiros, dimensao);
         }else
         {
-            tabelaDeEstruturas.inserirVarEmSTRCT(structName, nome, tipo, dimensao, nPonteiros);
+            tabelaDeEstruturas.inserirVarEmSTRCT(structName, nome, tipo, nPonteiros, dimensao);
         }
     }
     
@@ -83,10 +83,27 @@ public class STRCTContext {
     {
         if(mode == 0)
         {
-            return tabelaVARBase.verificar(nome);
+            EntradaTS_VAR etds = null;
+            for(TabelaDeSimbolos_VAR tabelaVAR : escoposVARBase.percorrerEscopo())
+            {
+                etds = tabelaVAR.verificar(nome);
+                if(etds != null)
+                    break;
+            }
+            return etds;
         }else
         {
             return tabelaDeEstruturas.verificarVarEmSTRCT(structName, nome);
         }
+    }
+    
+    void criaNovoEscopo()
+    {
+        escoposVARBase.criarNovoEscopo(new TabelaDeSimbolos_VAR());
+    }
+    
+    void abandonaEscopo()
+    {
+        escoposVARBase.abandonarEscopo();
     }
 }

@@ -1676,6 +1676,14 @@ public class LAParser extends Parser {
 	}
 
 	public static class CmdContext extends ParserRuleContext {
+		public Token cmdIsLeia;
+		public Mais_identContext leiaMaisIdent;
+		public Token cmdIsEscreva;
+		public Token cmdIsSe;
+		public Token cmdIsCase;
+		public Token cmdIsPara;
+		public Token cmdIsEnquanto;
+		public Token cmdIsFaca;
 		public Token cmdAtribPonteiroIdent;
 		public Token cmdAtribuicaoIdent;
 		public Token cmdReturn;
@@ -1744,17 +1752,17 @@ public class LAParser extends Parser {
 			case 58:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(277); match(58);
+				setState(277); ((CmdContext)_localctx).cmdIsLeia = match(58);
 				setState(278); match(13);
 				setState(279); identificador();
-				setState(280); mais_ident();
+				setState(280); ((CmdContext)_localctx).leiaMaisIdent = mais_ident();
 				setState(281); match(55);
 				}
 				break;
 			case 52:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(283); match(52);
+				setState(283); ((CmdContext)_localctx).cmdIsEscreva = match(52);
 				setState(284); match(13);
 				setState(285); expressao();
 				setState(286); mais_expressao();
@@ -1764,7 +1772,7 @@ public class LAParser extends Parser {
 			case 45:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(289); match(45);
+				setState(289); ((CmdContext)_localctx).cmdIsSe = match(45);
 				setState(290); expressao();
 				setState(291); match(16);
 				setState(292); comandos();
@@ -1775,7 +1783,7 @@ public class LAParser extends Parser {
 			case 30:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(296); match(30);
+				setState(296); ((CmdContext)_localctx).cmdIsCase = match(30);
 				setState(297); exp_aritmetica();
 				setState(298); match(12);
 				setState(299); selecao();
@@ -1786,7 +1794,7 @@ public class LAParser extends Parser {
 			case 14:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(303); match(14);
+				setState(303); ((CmdContext)_localctx).cmdIsPara = match(14);
 				setState(304); match(IDENT);
 				setState(305); match(20);
 				setState(306); exp_aritmetica();
@@ -1800,7 +1808,7 @@ public class LAParser extends Parser {
 			case 32:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(313); match(32);
+				setState(313); ((CmdContext)_localctx).cmdIsEnquanto = match(32);
 				setState(314); expressao();
 				setState(315); match(6);
 				setState(316); comandos();
@@ -1810,7 +1818,7 @@ public class LAParser extends Parser {
 			case 6:
 				enterOuterAlt(_localctx, 7);
 				{
-				setState(319); match(6);
+				setState(319); ((CmdContext)_localctx).cmdIsFaca = match(6);
 				setState(320); comandos();
 				setState(321); match(38);
 				setState(322); expressao();
@@ -3208,6 +3216,7 @@ public class LAParser extends Parser {
 	}
 
 	public static class Chamada_partesContext extends ParserRuleContext {
+		public Token cpIndicaFunc;
 		public ExpressaoContext expressao() {
 			return getRuleContext(ExpressaoContext.class,0);
 		}
@@ -3248,7 +3257,7 @@ public class LAParser extends Parser {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(461); match(13);
+				setState(461); ((Chamada_partesContext)_localctx).cpIndicaFunc = match(13);
 				setState(462); expressao();
 				setState(463); mais_expressao();
 				setState(464); match(55);

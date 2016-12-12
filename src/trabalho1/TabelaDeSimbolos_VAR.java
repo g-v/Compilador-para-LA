@@ -20,11 +20,13 @@ public class TabelaDeSimbolos_VAR {
         tabelaDeSimbolos = new HashMap<>();
     }
     
-    public void inserir(String nome, EntradaTS_TIPO tipo, int dimensao, int nPonteiros) {
+    public void inserir(String nome, EntradaTS_TIPO tipo, int nPonteiros, String... dimensao) {
         EntradaTS_VAR etds = new EntradaTS_VAR();
         etds.nome = nome;
         etds.tipo = tipo;
-        etds.dimensao = dimensao;
+        for(String d : dimensao)
+            etds.dimensao.add(d);
+        
         etds.nPonteiros = nPonteiros;
         tabelaDeSimbolos.put(nome, etds);
     }
