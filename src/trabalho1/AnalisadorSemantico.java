@@ -24,7 +24,6 @@ public class AnalisadorSemantico extends LABaseVisitor<Void> {
     TDSContext tdsContext;
 
     PrintWriter writer;
-    //tmp
 
     static final class varInfo {
 

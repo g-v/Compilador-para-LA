@@ -18,11 +18,21 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
+ * Classe principal do Gerador de Código.
  *
- * @author guerra
+ * Recebe como input um arquivo com um programa em linguagem LA, sem erros
+ * (tanto sintáticos quanto semânticos). Como output, gera o mesmo programa em
+ * linguagem C, "traduzindo" de forma a preservar o máximo de características da
+ * linguagem LA.
  */
 public class GeradorCodigo extends LABaseVisitor<Void> {
 
+    // "dicionários" (ou seja, Maps) vão ser usados nesta classe, pois além
+    // de serem simples de implementar, são mais que o suficiente para
+    // a classe do Gerador de Código.
+    // Uso padrão: - relação int <-> %d (scanf);
+    //             - conversão real -> float;
+    //             - etc
     Map<String, String> dictionaryTipos = new ConcurrentHashMap<String, String>();
     Map<String, String> variaveisTipos = new ConcurrentHashMap<String, String>();
     Map<String, String> variaveisScanf = new ConcurrentHashMap<String, String>();
@@ -32,53 +42,82 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
     String imprimirVariavel = "";
     String imprimirExpressao = "";
     String cadastrandoRegistro = "";
+
+    // na String saida irá ser armazenado todo o código do programa, que depois
+    // iremos escrever efetivamente em um arquivo
     String saida = "";
+
+    // variáveis auxiliares
     boolean imprimindo = false;
     boolean registrando = false;
+
+    // Iremos usar o método "println" da classe PrintWriter para escrever
+    // em arquivo
     PrintWriter writer;
 
+    /**
+     * Construtor GeradorCodigo
+     *
+     * arquivoSaida é o arquivo a ser escrito.
+     *
+     * @param arquivoSaida
+     * @throws IOException
+     */
     public GeradorCodigo(File arquivoSaida) throws IOException {
-        /*
-        System.out.print("#include <stdio.h>\n");
-        System.out.print("#include <stdlib.h>\n");
-        System.out.print("typedef int bool\n");
-        System.out.print("#define true 1\n");
-        System.out.print("#define false 0\n\n\n");
-         */
 
+        // configurar para UTF-8
         writer = new PrintWriter(arquivoSaida, "UTF-8");
 
+        // includes essenciais para compilar um programa em C
         saida += "#include <stdio.h>\n";
         saida += "#include <stdlib.h>\n";
 
+        // dicionário com tradução de tipos
         dictionaryTipos.put("real", "float");
         dictionaryTipos.put("inteiro", "int");
         dictionaryTipos.put("logico", "int");
         dictionaryTipos.put("literal", "char");
 
+        // dicionário com tradução dos tipos para o scanf
         variaveisScanf.put("float", "%f");
         variaveisScanf.put("int", "%d");
         variaveisScanf.put("char", "%s");
     }
 
+    /**
+     * closeCerto
+     * 
+     * Escrita no arquivo
+     */
     public void closeCerto() {
         writer.println(saida);
         writer.close();
     }
 
+    /**
+     * visitPrograma
+     * Regra inicial - programa
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitPrograma(LAParser.ProgramaContext ctx) {
         visitDeclaracoes(ctx.declaracoes());
-        //System.out.print("int main() {\n");
         saida += "int main() {\n";
         visitCorpo(ctx.corpo());
-        //System.out.print("return 0;\n}\n");
-        saida += "return 0;\n}\n";
+        saida += "return 0;\n}\n"; // retorno padrão em C
 
-        // escrever String "saida" no arquivo
         return null;
     }
 
+    /**
+     * visitDeclaracoes
+     * Declarações globais de variável e função
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
         if (ctx.decl_local_global() != null && ctx.decl_local_global().getText().isEmpty() == false) {
@@ -88,6 +127,13 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitCorpo
+     * Corpo do programa
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitCorpo(LAParser.CorpoContext ctx) {
         if (ctx.declaracoes_locais() != null && ctx.declaracoes_locais().getText().isEmpty() == false) {
@@ -99,6 +145,13 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitComandos
+     * Comandos do programa, "wrapper"
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitComandos(LAParser.ComandosContext ctx) {
         if (ctx.cmd() != null && ctx.cmd().getText().isEmpty() == false) {
@@ -110,36 +163,39 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitCmd
+     * Comandos do programa, implementação
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitCmd(LAParser.CmdContext ctx) {
 
-        // LEIA
+        // comando LEIA
+        // há a necessidade de usar o dicionário para funcionar
+        // corretamente
         if (ctx.idLeia != null && ctx.identificador().getText().isEmpty() == false) {
 
             String tipo = variaveisTipos.get(ctx.identificador().IDENT().getText());
             if (!tipo.equals("char")) {
-                //System.out.print("scanf(\"" + variaveisScanf.get(tipo) + "\", &");
                 saida += "scanf(\"" + variaveisScanf.get(tipo) + "\", &";
             } else {
-                //System.out.print("gets(");
                 saida += "gets(";
             }
             visitIdentificador(ctx.identificador());
-            //System.out.print(");\n");
             saida += ");\n";
 
             LAParser.Mais_identContext pointer = ctx.mais_ident();
 
             while (pointer != null && pointer.getText().isEmpty() == false) {
                 tipo = variaveisTipos.get(pointer.identificador().IDENT().getText());
-                //System.out.print("scanf(\"" + variaveisScanf.get(tipo) + "\", ");
                 saida += "scanf(\"" + variaveisScanf.get(tipo) + "\", ";
                 if (!tipo.equals("char*")) {
-                    //System.out.print("&");
                     saida += "&";
                 }
                 visitIdentificador(pointer.identificador());
-                //System.out.print(");\n");
                 saida += ");\n";
                 if (pointer.mais_ident() != null) {
                     pointer = pointer.mais_ident();
@@ -147,7 +203,7 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             }
         }
 
-        // ESCREVA
+        // comando ESCREVA
         if (ctx.idEscreva != null && ctx.idEscreva.getText().isEmpty() == false) {
 
             imprimindo = true;
@@ -156,15 +212,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             imprimirCadeia = "";
             imprimirVariavel = "";
 
-            //System.out.print("printf(");
             saida += "printf(";
             visitExpressao(ctx.expressao());
 
             if (imprimirCadeia != "") {
-                //System.out.print(imprimirCadeia + ");\n");
                 saida += imprimirCadeia + ");\n";
             } else {
-                //System.out.print("\"" + variaveisScanf.get(variaveisTipos.get(imprimirVariavel)) + "\", " + imprimirExpressao + ");\n");
                 saida += "\"" + variaveisScanf.get(variaveisTipos.get(imprimirVariavel)) + "\", " + imprimirExpressao + ");\n";
             }
 
@@ -176,15 +229,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
                 imprimirCadeia = "";
                 imprimirVariavel = "";
 
-                //System.out.print("printf(");
                 saida += "printf(";
                 visitExpressao(pointer.expressao());
 
                 if (imprimirCadeia != "") {
-                    //System.out.print(imprimirCadeia + ");\n");
                     saida += imprimirCadeia + ");\n";
                 } else {
-                    //System.out.print("\"" + variaveisScanf.get(variaveisTipos.get(imprimirVariavel)) + "\", " + imprimirExpressao + ");\n");
                     saida += "\"" + variaveisScanf.get(variaveisTipos.get(imprimirVariavel)) + "\", " + imprimirExpressao + ");\n";
                 }
 
@@ -197,26 +247,20 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             imprimirCadeia = "";
             imprimirVariavel = "";
 
-            //////////////////System.out.print("printf(\"\\n\");\n");
             imprimindo = false;
 
         }
 
         // IF ELSE
         if (ctx.idIf != null && ctx.idIf.getText().isEmpty() == false) {
-            //System.out.print("if(");
             saida += "if(";
             visitExpressao(ctx.expressao());
-            //System.out.print(") {\n");
             saida += ") {\n";
             visitComandos(ctx.idComandos);
-            //System.out.print("\n}\n");
             saida += "\n}\n";
             if (ctx.senao_opcional() != null && ctx.senao_opcional().getText().isEmpty() == false) {
-                //System.out.print("else {\n");
                 saida += "else {\n";
                 visitSenao_opcional(ctx.senao_opcional());
-                //System.out.print("\n}\n");
                 saida += "\n}\n";
             }
         }
@@ -224,10 +268,11 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         // ATRIBUICAO
         if (ctx.cmdAtribuicaoIdent != null && ctx.cmdAtribuicaoIdent.getText().isEmpty() == false) {
 
-            if(ctx.chamada_atribuicao().argumentos_opcional() != null && ctx.chamada_atribuicao().argumentos_opcional().getText().isEmpty() == false)
+            if (ctx.chamada_atribuicao().argumentos_opcional() != null && ctx.chamada_atribuicao().argumentos_opcional().getText().isEmpty() == false) {
                 imprimindo = false;
-            else                        
+            } else {
                 imprimindo = true;
+            }
 
             imprimirExpressao = ctx.IDENT().getText();
 
@@ -248,12 +293,9 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
 
             if (ctx.chamada_atribuicao() != null && ctx.chamada_atribuicao().getText().isEmpty() == false) {
                 if (ctx.chamada_atribuicao().argumentos_opcional() != null && ctx.chamada_atribuicao().argumentos_opcional().getText().isEmpty() == false) {
-                    //System.out.print(ctx.IDENT().getText());
                     saida += ctx.IDENT().getText();
-                    //System.out.print("(");
                     saida += "(";
                     visitArgumentos_opcional(ctx.chamada_atribuicao().argumentos_opcional());
-                    //System.out.print(")");
                     saida += ")";
                 } else {
                     if (ctx.chamada_atribuicao().outros_ident() != null && ctx.chamada_atribuicao().outros_ident().getText().isEmpty() == false) {
@@ -266,15 +308,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
                     imprimindo = false;
 
                     if (variaveisTipos.get(imprimirExpressao) != null && variaveisTipos.get(imprimirExpressao).equals("char")) {
-                        //System.out.print("strcpy(" + imprimirExpressao + ",");
                         saida += "strcpy(" + imprimirExpressao + ",";
                         if (ctx.chamada_atribuicao().expressao() != null && ctx.chamada_atribuicao().expressao().getText().isEmpty() == false) {
                             visitExpressao(ctx.chamada_atribuicao().expressao());
                         }
-                        //System.out.print(")");
                         saida += ")";
                     } else {
-                        //System.out.print(imprimirExpressao + " = ");
                         saida += imprimirExpressao + " = ";
                         if (ctx.chamada_atribuicao().expressao() != null && ctx.chamada_atribuicao().expressao().getText().isEmpty() == false) {
                             visitExpressao(ctx.chamada_atribuicao().expressao());
@@ -285,16 +324,13 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
 
             imprimindo = false;
 
-            //System.out.print(";\n");
             saida += ";\n";
         }
 
         // SWITCH CASE
         if (ctx.idCaso != null && ctx.idCaso.getText().isEmpty() == false) {
-            //System.out.print("switch(");
             saida += "switch(";
             visitExp_aritmetica(ctx.idCaso);
-            //System.out.print("){\n");
             saida += "){\n";
 
             if (ctx.selecao() != null && ctx.selecao().getText().isEmpty() == false) {
@@ -302,73 +338,52 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             }
 
             if (ctx.idDefault != null && ctx.idDefault.getText().isEmpty() == false) {
-                //System.out.print("default:\n");
                 saida += "default:\n";
                 visitComandos(ctx.idDefault.comandos());
             }
 
-            //System.out.print("}\n");
             saida += "}\n";
         }
 
-        //FOR
+        // FOR
         if (ctx.idFor != null && ctx.idFor.getText().isEmpty() == false) {
-            //System.out.print("for(");
             saida += "for(";
-            //System.out.print(ctx.idFor.getText());
             saida += ctx.idFor.getText();
-            //System.out.print(" = ");
             saida += " = ";
             visitExp_aritmetica(ctx.idExp1);
-            //System.out.print("; ");
             saida += "; ";
-            //System.out.print(ctx.idFor.getText());
             saida += ctx.idFor.getText();
-            //System.out.print(" <= ");
             saida += " <= ";
             visitExp_aritmetica(ctx.idExp2);
-            //System.out.print("; ");
             saida += "; ";
-            //System.out.print(ctx.idFor.getText() + "++){\n");
             saida += ctx.idFor.getText() + "++){\n";
             visitComandos(ctx.comandos());
-            //System.out.print("}\n");
             saida += "}\n";
 
         }
 
-        //WHILE
+        // WHILE
         if (ctx.idWhile != null && ctx.idWhile.getText().isEmpty() == false) {
-            //System.out.print("while(");
             saida += "while(";
-            //System.out.print(ctx.idWhile.getText());
             saida += ctx.idWhile.getText();
-            //System.out.print("){\n");
             saida += "){\n";
             visitComandos(ctx.comandos());
-            //System.out.print("}\n");
             saida += "}\n";
         }
 
-        //DO WHILE
+        // DO WHILE
         if (ctx.idDoWhile != null && ctx.idDoWhile.getText().isEmpty() == false) {
-            //System.out.print("do{\n");
             saida += "do{\n";
             visitComandos(ctx.comandos());
-            //System.out.print("}");
             saida += "}";
-            //System.out.print("while(");
             saida += "while(";
             visitExpressao(ctx.expressao());
-            //System.out.print(");\n");
             saida += ");\n";
         }
 
-        //ATRIBUIÇÂO DE PONTEIRO
+        // ATRIBUIÇÂO DE PONTEIRO
         if (ctx.cmdAtribPonteiroIdent != null && ctx.cmdAtribPonteiroIdent.getText().isEmpty() == false) {
-            //System.out.print("*");
             saida += "*";
-            //System.out.print(ctx.cmdAtribPonteiroIdent.getText());
             saida += ctx.cmdAtribPonteiroIdent.getText();
             if (ctx.outros_ident() != null && ctx.outros_ident().getText().isEmpty() == false) {
                 visitOutros_ident(ctx.outros_ident());
@@ -378,30 +393,31 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
                 visitDimensao(ctx.dimensao());
             }
 
-            //System.out.print("=");
             saida += "=";
             visitExpressao(ctx.expressao());
-            //System.out.print(";\n");
             saida += ";\n";
         }
 
-        //  RETORNO
+        // RETORNO
         if (ctx.cmdReturn != null && ctx.cmdReturn.getText().isEmpty() == false) {
-            //System.out.print("return ");
             saida += "return ";
             visitExpressao(ctx.expressao());
-            //System.out.println();
             saida += ";\n";
         }
 
         return null;
     }
 
+    /**
+     * visitSelecao
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitSelecao(LAParser.SelecaoContext ctx) {
         visitConstantes(ctx.constantes());
         visitComandos(ctx.comandos());
-        //System.out.print("break;\n");
         saida += "break;\n";
         if (ctx.mais_selecao() != null && ctx.mais_selecao().getText().isEmpty() == false) {
             visitSelecao(ctx.mais_selecao().selecao());
@@ -410,25 +426,35 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitConstantes
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitConstantes(LAParser.ConstantesContext ctx) {
 
         if (ctx.numero_intervalo().intervalo_opcional().NUM_INT() == null) {
             int value = Integer.parseInt(ctx.numero_intervalo().NUM_INT().toString());
-            //System.out.print("case " + value + ":\n ");
             saida += "case " + value + ":\n ";
         } else {
             int firstValue = Integer.parseInt(ctx.numero_intervalo().NUM_INT().toString());
             int lastValue = Integer.parseInt(ctx.numero_intervalo().intervalo_opcional().NUM_INT().toString());
 
             for (int i = firstValue; i <= lastValue; i++) {
-                //System.out.print("case " + i + ":\n");   
                 saida += "case " + i + ":\n";
             }
         }
         return null;
     }
 
+    /**
+     * visitExpressao
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitExpressao(LAParser.ExpressaoContext ctx) {
         if (ctx.termo_logico() != null && ctx.termo_logico().getText().isEmpty() == false) {
@@ -440,6 +466,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitTermo_logico
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitTermo_logico(LAParser.Termo_logicoContext ctx) {
         if (ctx.fator_logico() != null && ctx.fator_logico().getText().isEmpty() == false) {
@@ -451,10 +483,15 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitFator_logico
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitFator_logico(LAParser.Fator_logicoContext ctx) {
         if (ctx.op_nao() != null && ctx.op_nao().getText().isEmpty() == false) {
-            //System.out.print("!");
             saida += "!";
         }
         if (ctx.parcela_logica() != null && ctx.parcela_logica().getText().isEmpty() == false) {
@@ -463,14 +500,18 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitParcela_logica
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitParcela_logica(LAParser.Parcela_logicaContext ctx) {
 
         if (ctx.plTRUE != null) {
-            //System.out.print("true");
             saida += "true";
         } else if (ctx.plFALSE != null) {
-            //System.out.print("false");
             saida += "false";
         } else {
             visitExp_relacional(ctx.exp_relacional());
@@ -478,6 +519,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitExp_relacional
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitExp_relacional(LAParser.Exp_relacionalContext ctx) {
         if (ctx.exp_aritmetica() != null && ctx.exp_aritmetica().getText().isEmpty() == false) {
@@ -489,10 +536,15 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitOutros_termos_logicos
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitOutros_termos_logicos(LAParser.Outros_termos_logicosContext ctx) {
         if (ctx.termo_logico() != null && ctx.termo_logico().getText().isEmpty() == false) {
-            //System.out.print(" || ");
             saida += " || ";
             visitTermo_logico(ctx.termo_logico());
         }
@@ -502,10 +554,15 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitOutros_fatores_logicos
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitOutros_fatores_logicos(LAParser.Outros_fatores_logicosContext ctx) {
         if (ctx.fator_logico() != null && ctx.fator_logico().getText().isEmpty() == false) {
-            //System.out.print(" && ");
             saida += " && ";
             visitFator_logico(ctx.fator_logico());
         }
@@ -515,6 +572,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitIdentificador
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitIdentificador(LAParser.IdentificadorContext ctx) {
         if (ctx.ponteiros_opcionais() != null && ctx.ponteiros_opcionais().getText().isEmpty() == false) {
@@ -525,7 +588,6 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
                 imprimirVariavel += ctx.IDENT().getText();
                 imprimirExpressao += ctx.IDENT().getText();
             } else {
-                //System.out.print(ctx.IDENT().getText());
                 saida += ctx.IDENT().getText();
             }
         }
@@ -538,6 +600,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitOutros_ident
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitOutros_ident(LAParser.Outros_identContext ctx) {
         if (ctx.identificador() != null && ctx.identificador().getText().isEmpty() == false) {
@@ -545,7 +613,6 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
                 imprimirVariavel += ".";
                 imprimirExpressao += ".";
             } else {
-                //System.out.print(".");
                 saida += ".";
             }
             visitIdentificador(ctx.identificador());
@@ -553,10 +620,15 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitPonteiros_opcionais
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitPonteiros_opcionais(LAParser.Ponteiros_opcionaisContext ctx) {
         if (imprimindo) {
-            //System.out.print("*");
             saida += "*";
         }
         if (ctx.ponteiros_opcionais() != null && ctx.ponteiros_opcionais().getText().isEmpty() == false) {
@@ -566,6 +638,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitDecl_local_global
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitDecl_local_global(LAParser.Decl_local_globalContext ctx) {
         if (ctx.declaracao_local() != null && ctx.declaracao_local().getText().isEmpty() == false) {
@@ -576,31 +654,30 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitDeclaracao_local
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {
         if (ctx.variavel() != null && ctx.variavel().getText().isEmpty() == false) {
             visitVariavel(ctx.variavel());
         } else if (ctx.dclLocalConst != null && ctx.dclLocalConst.getText().isEmpty() == false) {
-            //System.out.print("#define ");
             saida += "#define ";
-            //System.out.print(ctx.IDENT().getText() + " ");
             saida += ctx.IDENT().getText() + " ";
             if (ctx.valor_constante().idVdd != null) {
-                //System.out.print("true");
                 saida += "true";
             } else if (ctx.valor_constante().idFake != null) {
-                //System.out.print("false");
                 saida += "false";
             } else {
-                //System.out.print(ctx.valor_constante().getText());
                 saida += ctx.valor_constante().getText();
             }
-            //System.out.print("\n");
             saida += "\n";
         }
 
         if (ctx.dclLocalTipo != null && ctx.dclLocalTipo.getText().isEmpty() == false) {
-            //System.out.print("typedef ");
             saida += "typedef ";
             String ident = ctx.IDENT().getText();
 
@@ -608,14 +685,11 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
                 registrando = true;
                 cadastrandoRegistro = ident;
                 visitRegistro(ctx.tipo().registro());
-                //System.out.print(" " + ident + ";\n");
                 saida += " " + ident + ";\n";
                 registrando = false;
             } else {
                 visitTipo(ctx.tipo());
-                //System.out.print(ctx.IDENT().getText() + " ");
                 saida += ctx.IDENT().getText() + " ";
-                //System.out.print(";\n");
                 saida += ";\n";
             }
 
@@ -625,6 +699,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitDeclaracoes_locais
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitDeclaracoes_locais(LAParser.Declaracoes_locaisContext ctx) {
         visitDeclaracao_local(ctx.declaracao_local());
@@ -634,6 +714,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitVariavel
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitVariavel(LAParser.VariavelContext ctx) {
 
@@ -652,7 +738,6 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
 
             tipoAtual = tipoAtual.replaceAll("[^a-zA-Z]", "");
 
-            //System.out.print(dictionaryTipos.get(tipoAtual) + nPointers + " " + ident);
             saida += dictionaryTipos.get(tipoAtual) + nPointers + " " + ident;
 
             if (!registrando) {
@@ -669,29 +754,30 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             }
 
             if (tipoAtual.equals("literal")) {
-                //System.out.print("[80]");
                 saida += "[80]";
             }
 
-            //System.out.print(";\n");
             saida += ";\n";
         } else {
             registrando = true;
             cadastrandoRegistro = ident;
             visitRegistro(ctx.tipo().registro());
-            //System.out.print(" " + ident + ";\n");
             saida += " " + ident + ";\n";
             registrando = false;
         }
         return null;
     }
 
+    /**
+     * visitMais_var
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitMais_var(LAParser.Mais_varContext ctx) {
-        //System.out.print(", ");
         saida += ", ";
         String ident = ctx.IDENT().getText();
-        //System.out.print(ident);
         saida += ident;
         variaveisTipos.put(ident, dictionaryTipos.get(tipoAtual));
         if (ctx.dimensao() != null && ctx.dimensao().getText().isEmpty() == false) {
@@ -704,13 +790,18 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitDimensao
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitDimensao(LAParser.DimensaoContext ctx) {
 
         if (imprimindo) {
             imprimirExpressao += "[";
         } else {
-            //System.out.print("[");
             saida += "[";
         }
 
@@ -719,7 +810,6 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         if (imprimindo) {
             imprimirExpressao += "]";
         } else {
-            //System.out.print("]");
             saida += "]";
         }
 
@@ -729,6 +819,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitExp_aritmetica
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx) {
         if (ctx.termo() != null && ctx.termo().getText().isEmpty() == false) {
@@ -740,6 +836,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitTermo
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitTermo(LAParser.TermoContext ctx) {
         if (ctx.fator() != null && ctx.fator().getText().isEmpty() == false) {
@@ -751,10 +853,15 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitOutros_fatores
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitOutros_fatores(LAParser.Outros_fatoresContext ctx) {
         if (ctx.op_multiplicacao() != null && ctx.op_multiplicacao().getText().isEmpty() == false) {
-            //System.out.print(ctx.op_multiplicacao().getText());
             saida += ctx.op_multiplicacao().getText();
         }
         if (ctx.fator() != null && ctx.fator().getText().isEmpty() == false) {
@@ -766,6 +873,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitFator
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitFator(LAParser.FatorContext ctx) {
         if (ctx.parcela() != null && ctx.parcela().getText().isEmpty() == false) {
@@ -776,13 +889,18 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitOutros_termos
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitOutros_termos(LAParser.Outros_termosContext ctx) {
         if (ctx.op_adicao() != null && ctx.op_adicao().getText().isEmpty() == false) {
             if (imprimindo) {
                 imprimirExpressao += ctx.op_adicao().getText();
             } else {
-                //System.out.print(ctx.op_adicao().getText());
                 saida += ctx.op_adicao().getText();
             }
         }
@@ -795,13 +913,18 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitParcela_unario
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
         if (ctx.puNomeIdent1 != null) {
             if (imprimindo) {
                 imprimirExpressao += "*" + ctx.IDENT().getText();
             } else {
-                //System.out.print("*" + ctx.IDENT().getText());
                 saida += "*" + ctx.IDENT().getText();
             }
             if (ctx.outros_ident() != null && ctx.outros_ident().getText().isEmpty() == false) {
@@ -821,7 +944,6 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
 
                 imprimirExpressao += ctx.IDENT().getText();
             } else {
-                //System.out.print(ctx.IDENT().getText());
                 saida += ctx.IDENT().getText();
             }
             visitChamada_partes(ctx.chamada_partes());
@@ -830,35 +952,36 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             if (imprimindo) {
                 imprimirExpressao += ctx.NUM_INT().getText();
             } else {
-                //System.out.print(ctx.NUM_INT().getText());
                 saida += ctx.NUM_INT().getText();
             }
         } else if (ctx.NUM_REAL() != null) {
             if (imprimindo) {
                 imprimirExpressao += ctx.NUM_REAL().getText();
             } else {
-                //System.out.print(ctx.NUM_REAL().getText());
                 saida += ctx.NUM_REAL().getText();
             }
         } else {
-            //System.out.print("(");
             saida += "(";
             if (ctx.expressao() != null && ctx.expressao().getText().isEmpty() == false) {
                 visitExpressao(ctx.expressao());
             }
-            //System.out.print(")");
             saida += ")";
         }
         return null;
     }
 
+    /**
+     * visitChamada_partes
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitChamada_partes(LAParser.Chamada_partesContext ctx) {
         if (ctx.idAbre != null && ctx.idFecha != null) {
             if (imprimindo) {
                 imprimirExpressao += "(";
-            } else //System.out.print("(");
-            {
+            } else {
                 saida += "(";
             }
             if (ctx.expressao() != null && ctx.expressao().getText().isEmpty() == false) {
@@ -869,8 +992,7 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             }
             if (imprimindo) {
                 imprimirExpressao += ")";
-            } else //System.out.print(")");
-            {
+            } else {
                 saida += ")";
             }
         } else if (ctx.outros_ident() != null && ctx.outros_ident().getText().isEmpty() == false) {
@@ -884,6 +1006,12 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitParcela
+     *
+     * @param ctx
+     * @return
+     */
     @Override
     public Void visitParcela(LAParser.ParcelaContext ctx) {
         if (ctx.op_unario() != null && ctx.op_unario().getText().isEmpty() == false) {
@@ -898,11 +1026,15 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         }
         return null;
     }
-
+    
+    /**
+     * visitParcela_nao_unario
+     * @param ctx
+     * @return 
+     */
     @Override
     public Void visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) {
         if (ctx.IDENT() != null) {
-            //System.out.print("&" + ctx.IDENT().getText());
             saida += "&" + ctx.IDENT().getText();
             if (ctx.outros_ident() != null && ctx.outros_ident().getText().isEmpty() == false) {
                 visitOutros_ident(ctx.outros_ident());
@@ -913,18 +1045,21 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         } else {
             if (imprimindo) {
                 imprimirCadeia += ctx.CADEIA().getText();
-            } else //System.out.print(ctx.CADEIA().getText());
-            {
+            } else {
                 saida += ctx.CADEIA().getText();
             }
         }
         return null;
     }
 
+    /**
+     * visitOutras_parcelas
+     * @param ctx
+     * @return 
+     */
     @Override
     public Void visitOutras_parcelas(LAParser.Outras_parcelasContext ctx) {
         if (ctx.parcela() != null && ctx.parcela().getText().isEmpty() == false) {
-            //System.out.print("%");
             saida += "%";
             visitParcela(ctx.parcela());
             if (ctx.outras_parcelas() != null && ctx.outras_parcelas().getText().isEmpty() == false) {
@@ -934,35 +1069,44 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitOp_relacional
+     * @param ctx
+     * @return 
+     */
     @Override
     public Void visitOp_relacional(LAParser.Op_relacionalContext ctx) {
         String op = ctx.getText();
         switch (op) {
             case "=":
-                /*System.out.print("=="); break;*/ saida += "==";
+                saida += "==";
                 break;
             case "<>":
-                /*System.out.print("!="); break;*/ saida += "!=";
+                saida += "!=";
                 break;
             case ">=":
-                /*System.out.print(">="); break;*/ saida += ">=";
+                saida += ">=";
                 break;
             case "<=":
-                /*System.out.print("<="); break;*/ saida += "<=";
+                saida += "<=";
                 break;
             case ">":
-                /*System.out.print(">"); break;*/ saida += ">";
+                saida += ">";
                 break;
             case "<":
-                /*System.out.print("<"); break;*/ saida += "<";
+                saida += "<";
                 break;
         }
         return null;
     }
 
+    /**
+     * visitRegistro
+     * @param ctx
+     * @return 
+     */
     @Override
     public Void visitRegistro(LAParser.RegistroContext ctx) {
-        //System.out.print("struct {\n");
         saida += "struct {\n";
         visitVariavel(ctx.variavel());
         if (ctx.mais_variaveis() != null && ctx.mais_variaveis().getText().isEmpty() == false) {
@@ -977,20 +1121,22 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
                 }
             }
         }
-        //System.out.print("}");
         saida += "}";
         return null;
     }
 
+    /**
+     * visitDeclaracao_global
+     * @param ctx
+     * @return 
+     */
     @Override
     public Void visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
         if (ctx.dclGlobalProcedimento != null) {
-            //System.out.print("void " + ctx.dclGlobalProcedimento.getText() + "(");
             saida += "void " + ctx.dclGlobalProcedimento.getText() + "(";
             if (ctx.parametros_opcional() != null && ctx.parametros_opcional().getText().isEmpty() == false) {
                 visitParametros_opcional(ctx.parametros_opcional());
             }
-            //System.out.print("){\n");
             saida += "){\n";
             if (ctx.declaracoes_locais() != null && ctx.declaracoes_locais().getText().isEmpty() == false) {
                 visitDeclaracoes_locais(ctx.declaracoes_locais());
@@ -998,16 +1144,13 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             if (ctx.comandos() != null && ctx.comandos().getText().isEmpty() == false) {
                 visitComandos(ctx.comandos());
             }
-            //System.out.print("}\n");
             saida += "}\n";
         } else if (ctx.dclGlobalFuncao != null) {
             visitTipo_estendido(ctx.tipo_estendido());
-            //System.out.print(ctx.dclGlobalFuncao.getText() + "(");
             saida += ctx.dclGlobalFuncao.getText() + "(";
             if (ctx.parametros_opcional() != null && ctx.parametros_opcional().getText().isEmpty() == false) {
                 visitParametros_opcional(ctx.parametros_opcional());
             }
-            //System.out.print("){\n");
             saida += "){\n";
             if (ctx.declaracoes_locais() != null && ctx.declaracoes_locais().getText().isEmpty() == false) {
                 visitDeclaracoes_locais(ctx.declaracoes_locais());
@@ -1015,10 +1158,8 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             if (ctx.comandos() != null && ctx.comandos().getText().isEmpty() == false) {
                 visitComandos(ctx.comandos());
             }
-            //System.out.print("}\n");
             saida += "}\n";
 
-            /*Colocando a função na lista de variáveis*/
             String ident = ctx.dclGlobalFuncao.getText();
 
             if (ctx.tipo_estendido().tipo_basico_ident().tipo_basico() != null && ctx.tipo_estendido().tipo_basico_ident().tipo_basico().getText().isEmpty() == false) {
@@ -1034,13 +1175,18 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             } else {
                 variaveisTipos.put(ident, ctx.tipo_estendido().tipo_basico_ident().IDENT().getText());
             }
-            /*Término da colocação da função na lista de variáveis*/
+            /* Término da colocação da função na lista de variáveis */
 
         }
 
         return null;
     }
 
+    /**
+     * visitParametros_opcional
+     * @param ctx
+     * @return 
+     */
     @Override
     public Void visitParametros_opcional(LAParser.Parametros_opcionalContext ctx) {
         if (ctx.parametro() != null && ctx.parametro().getText().isEmpty() == false) {
@@ -1049,13 +1195,18 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
 
         return null;
     }
-
+    
+    /**
+     * visitParametro
+     * @param ctx
+     * @return 
+     */
     @Override
     public Void visitParametro(LAParser.ParametroContext ctx) {
         visitTipo_estendido(ctx.tipo_estendido());
         visitIdentificador(ctx.identificador());
 
-        /*Colocando parâmetros na lista de variáveis*/
+        /* Colocando parâmetros na lista de variáveis */
         String ident = ctx.identificador().IDENT().getText();
 
         if (ctx.tipo_estendido().tipo_basico_ident().tipo_basico() != null && ctx.tipo_estendido().tipo_basico_ident().tipo_basico().getText().isEmpty() == false) {
@@ -1071,17 +1222,16 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         } else {
             variaveisTipos.put(ident, ctx.tipo_estendido().tipo_basico_ident().IDENT().getText());
         }
-        /*Término da colocação de parametros na lista de variáveis*/
+        /* Término da colocação de parametros na lista de variáveis */
 
         LAParser.Mais_identContext pointer = ctx.mais_ident();
 
         while (pointer != null && pointer.getText().isEmpty() == false) {
-            //System.out.print(", ");
             saida += ", ";
             visitTipo_estendido(ctx.tipo_estendido());
             visitIdentificador(pointer.identificador());
 
-            /*Colocando parâmetros na lista de variáveis*/
+            /* Colocando parâmetros na lista de variáveis */
             ident = pointer.identificador().IDENT().getText();
 
             if (ctx.tipo_estendido().tipo_basico_ident().tipo_basico() != null && ctx.tipo_estendido().tipo_basico_ident().tipo_basico().getText().isEmpty() == false) {
@@ -1097,7 +1247,7 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
             } else {
                 variaveisTipos.put(ident, ctx.tipo_estendido().tipo_basico_ident().IDENT().getText());
             }
-            /*Término da colocação de parametros na lista de variáveis*/
+            /* Término da colocação de parametros na lista de variáveis */
 
             if (pointer.mais_ident() != null) {
                 pointer = pointer.mais_ident();
@@ -1105,7 +1255,6 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         }
 
         if (ctx.mais_parametros() != null && ctx.mais_parametros().getText().isEmpty() == false) {
-            //System.out.print(", ");
             saida += ", ";
             visitParametro(ctx.mais_parametros().parametro());
         }
@@ -1113,6 +1262,11 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitTipo_estendido
+     * @param ctx
+     * @return 
+     */
     @Override
     public Void visitTipo_estendido(LAParser.Tipo_estendidoContext ctx) {
         if (ctx.ponteiros_opcionais() != null && ctx.ponteiros_opcionais().getText().isEmpty() == false) {
@@ -1123,35 +1277,39 @@ public class GeradorCodigo extends LABaseVisitor<Void> {
         return null;
     }
 
+    /**
+     * visitTipo_basico_ident
+     * @param ctx
+     * @return 
+     */
     @Override
     public Void visitTipo_basico_ident(LAParser.Tipo_basico_identContext ctx) {
 
         if (ctx.tipo_basico().getText().equals("literal")) {
-            //System.out.print("char* ");
             saida += "char* ";
         } else if (ctx.tipo_basico().getText().equals("inteiro")) {
             System.out.print("int ");
             saida += "int ";
         } else if (ctx.tipo_basico().getText().equals("real")) {
-            //System.out.print("float ");
             saida += "float ";
         } else if (ctx.tipo_basico().getText().equals("logico")) {
-            //System.out.print("bool ");
             saida += "bool ";
         } else if (ctx.IDENT() != null && ctx.IDENT().getText().isEmpty() == false) {
-            //System.out.print(ctx.IDENT().getText());
             saida += ctx.IDENT().getText();
         }
         return null;
     }
 
+    /**
+     * visitChamada_atribuicao
+     * @param ctx
+     * @return 
+     */
     @Override
     public Void visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
         if (ctx.argumentos_opcional() != null && ctx.argumentos_opcional().getText().isEmpty() == false) {
-            //System.out.print("(");
             saida += "(";
             visitArgumentos_opcional(ctx.argumentos_opcional());
-            //System.out.print(")");
             saida += ")";
 
         }
