@@ -402,7 +402,11 @@ public class AnalisadorSemantico extends LABaseVisitor<Void> {
                 } else {
                     funcInfo.nomeChamada = ctx.cmdAtribuicaoIdent.getText();
                     if (ctx.chamada_atribuicao().argumentos_opcional().getText().isEmpty() == false) {
+                    {
+                        int nExpPai = expInfo.nExpressoes;
                         visitArgumentos_opcional(ctx.chamada_atribuicao().argumentos_opcional());
+                        expInfo.nExpressoes = nExpPai;
+                    }
                     } else if (etds.nArgumentos > 0) {
                         writer.println("Linha " + ctx.start.getLine()
                                 + ": incompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
@@ -775,6 +779,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void> {
     @Override
     public Void visitChamada_partes(LAParser.Chamada_partesContext ctx) {
         if (ctx.cpIndicaFunc != null) {
+            int nExpPai = expInfo.nExpressoes;
             expInfo.nExpressoes = 0;
             EntradaTS_FUNC etds = tdsContext.verificaFUNC(funcInfo.nomeChamada);
             if (ctx.expressao().getText().isEmpty() == true) {
@@ -805,6 +810,8 @@ public class AnalisadorSemantico extends LABaseVisitor<Void> {
                 writer.println("Linha " + ctx.start.getLine()
                         + ": incompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
             }
+            
+            expInfo.nExpressoes = nExpPai;
         }
 
         return null;

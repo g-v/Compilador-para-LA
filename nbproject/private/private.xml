@@ -5,6 +5,8 @@
         <group>
             <file>file:/home/akari/Documentos/T1/compilador2/Compilador-para-LA/src/trabalho1/ParserFacade.java</file>
             <file>file:/home/akari/Documentos/T1/compilador2/Compilador-para-LA/src/trabalho1/AnalisadorSemantico.java</file>
+            <file>file:/home/akari/Documentos/T1/compilador2/Compilador-para-LA/src/trabalho1/GeradorCodigo.java</file>
+            <file>file:/home/akari/Documentos/T1/compilador2/Compilador-para-LA/src/trabalho1/Example.java</file>
         </group>
     </open-files>
 </project-private>
