@@ -1,4 +1,4 @@
-// Generated from /home/akari/natasha/Compilador-para-LA/src/main/antlr/LA.g4 by ANTLR 4.2.2
+// Generated from C:\Users\Esquilo\Documents\GitHub\Compilador-para-LA\src\main\antlr\LA.g4 by ANTLR 4.2.2
 package trabalho1.parser;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
