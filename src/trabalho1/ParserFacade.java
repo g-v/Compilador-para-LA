@@ -93,19 +93,21 @@ public class ParserFacade {
         parser.removeErrorListeners();
         parser.addErrorListener(sintaxListener);
 
-        AnalisadorSemantico analisadorSemantico = new AnalisadorSemantico(saida);
+        
 
         LAParser.ProgramaContext context = parser.programa();
 
         if (Example.modo == 2) {
+            AnalisadorSemantico analisadorSemantico = new AnalisadorSemantico(saida);
             System.out.println("Iniciando analise semantica");
             analisadorSemantico.visit(context);
             analisadorSemantico.close();
         }
 
-        GeradorCodigo geradorCodigo = new GeradorCodigo(saida);
+        
 
         if (Example.modo == 3) {
+            GeradorCodigo geradorCodigo = new GeradorCodigo(saida);
             System.out.println("Iniciando geração de codigo");
             geradorCodigo.visit(context);
             geradorCodigo.closeCerto();

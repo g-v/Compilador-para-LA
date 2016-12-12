@@ -405,7 +405,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void> {
                         visitArgumentos_opcional(ctx.chamada_atribuicao().argumentos_opcional());
                     } else if (etds.nArgumentos > 0) {
                         writer.println("Linha " + ctx.start.getLine()
-                                + ": imcompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
+                                + ": incompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
                     }
                 }
             }
@@ -493,7 +493,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void> {
         tdsContext.setFUNCMode(funcInfo.nomeChamada);
         if (tdsContext.tiposIguais(tdsContext.recuperaArg(0).tipo.nome, expInfo.tipoExpressao) == false) {
             writer.println("Linha " + ctx.start.getLine()
-                    + ": imcompatibilidade de parametros na chamada de " + funcInfo.nomeFuncao);
+                    + ": incompatibilidade de parametros na chamada de " + funcInfo.nomeFuncao);
         }
 
         tdsContext.leaveFUNCMode();
@@ -758,7 +758,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void> {
             } else {
                 if (tdsContext.tiposIguais(etds.tipo.nome, expInfo.tipoExpressao) == false) {
                     writer.println("Linha " + ctx.start.getLine()
-                            + ": imcompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
+                            + ": incompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
                 }
             }
 
@@ -780,7 +780,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void> {
             if (ctx.expressao().getText().isEmpty() == true) {
                 if (etds.nArgumentos > 0) {
                     writer.println("Linha " + ctx.start.getLine()
-                            + ": imcompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
+                            + ": incompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
                 }
             } else {
                 visitExpressao(ctx.expressao());
@@ -789,7 +789,7 @@ public class AnalisadorSemantico extends LABaseVisitor<Void> {
 
                 if (tdsContext.tiposIguais(tdsContext.recuperaArg(0).tipo.nome, expInfo.tipoExpressao) == false) {
                     writer.println("Linha " + ctx.start.getLine()
-                            + ": imcompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
+                            + ": incompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
                 }
                 tdsContext.leaveFUNCMode();
             }
@@ -800,10 +800,10 @@ public class AnalisadorSemantico extends LABaseVisitor<Void> {
 
             if (expInfo.nExpressoes > etds.nArgumentos) {
                 writer.println("Linha " + ctx.start.getLine()
-                        + ": imcompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
+                        + ": incompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
             } else if (expInfo.nExpressoes < etds.nArgumentos) {
                 writer.println("Linha " + ctx.start.getLine()
-                        + ": imcompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
+                        + ": incompatibilidade de parametros na chamada de " + funcInfo.nomeChamada);
             }
         }
 
